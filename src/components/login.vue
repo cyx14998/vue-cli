@@ -2,14 +2,11 @@
   <div class="hello">
     <img alt="Vue logo" src="../assets/logo.png">
     <h1>{{ msg }}</h1>
-    <div>
-      <el-button type="primary" @click="()=>{this.$router.push({ path: '/', params: { userId: 123 } })}">
-        go to index
-      </el-button>
-    </div>
+    <el-button type="primary" @click="()=>{this.$router.push({ path: '/', params: { userId: 123 } })}">
+      go to index
+    </el-button>
     <el-select class="select" v-model="value" clearable placeholder="请选择">
-      <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-      </el-option>
+      <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
     </el-select>
   </div>
 </template>
@@ -53,6 +50,7 @@ export default {
 
 <style scoped>
 .select {
-  margin-top: 20px;
+  color: @primary;
+  margin-left: 20px;
 }
 </style>
