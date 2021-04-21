@@ -22,12 +22,14 @@ module.exports = {
         }
     },
 
+    // 配置其他插件
     pluginOptions: {
-      'style-resources-loader': {
-        preProcessor: 'less',
-        patterns: [
-            path.resolve(__dirname, './src/assets/common.less')
-        ]
-      }
+        // 引入全局less样式
+        'style-resources-loader': {
+            preProcessor: 'less',
+            patterns: [
+                path.resolve(__dirname, './src/assets/common.less')
+            ]
+        }
     }
 }
