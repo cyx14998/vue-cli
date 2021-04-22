@@ -63,7 +63,7 @@ export default (options) => {
             data: params,
             timeout: 6000
         }).then(result => {
-            resolve(result.data)
+            result && result.data ? resolve(result.data) : reject(result)
         }).catch(err => {
             reject(err)
         })

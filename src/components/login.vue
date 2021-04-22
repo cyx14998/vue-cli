@@ -5,9 +5,12 @@
     <el-button class="button" type="primary" @click="()=>{this.$router.push({ path: '/', params: { userId: 123 } })}">
       go to index
     </el-button>
-    <el-select class="select" v-model="value" clearable placeholder="请选择">
+    <el-select class="select" v-model="value" clearable placeholder="请选择" @change="change" v-loading="loading">
       <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
     </el-select>
+    <div v-if="result">
+      <p>{{result.content}}</p>
+    </div>
   </div>
 </template>
 
@@ -18,32 +21,39 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App of login page',
       options: [{
-        value: '选项1',
+        value: '黄金糕',
         label: '黄金糕'
       }, {
-        value: '选项2',
+        value: '双皮奶',
         label: '双皮奶'
       }, {
-        value: '选项3',
+        value: '蚵仔煎',
         label: '蚵仔煎'
       }, {
-        value: '选项4',
+        value: '龙须面',
         label: '龙须面'
       }, {
-        value: '选项5',
+        value: '北京烤鸭',
         label: '北京烤鸭'
       }],
-      value: ''
+      value: '',
+      result: '',
+      loading: false
     }
   },
   created () {
-    get({ key: 'free', appid: 0, msg: '测试' }).then((e) => {
-      console.log(e)
-    }).catch((e) => {
-      console.log(e)
-    })
+
   },
   methods: {
+    change (data) {
+      this.loading = true
+      get({ key: 'free', appid: 0, msg: data }).then((e) => {
+        this.result = e
+        this.loading = false
+      }).catch((e) => {
+        console.log(e)
+      })
+    }
   }
 }
 </script>
