@@ -1,13 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './routes'	//引入路由配置文件
-
+import router from './router'
+import './theme/index.css'
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI);
-
+import "./static/css/base.css";
 Vue.config.productionTip = false
-
+import api from './api/index'
+Vue.prototype.$api = api
 router.beforeEach((to, from, next) => {
   /* 路由发生变化修改页面title */
   if (to.meta.title) {
@@ -15,8 +14,8 @@ router.beforeEach((to, from, next) => {
   }
   next()
 })
-
+Vue.use(ElementUI);
 new Vue({
+  router,
   render: h => h(App),
-  router
 }).$mount('#app')

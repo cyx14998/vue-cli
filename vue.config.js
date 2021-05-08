@@ -8,28 +8,19 @@ module.exports = {
     },
 
     outputDir: 'dist',
+    lintOnSave: false,
 
     devServer: {
+        overlay: {
+            warning: false,
+            errors: false
+        },
         port: '8081',
         proxy: {
-            '/proxy': {
-                target: 'http://api.qingyunke.com',   //代理接口
-                changeOrigin: true,
-                pathRewrite: {
-                    '/proxy': '/'
-                }
+            "/graphs_api": {
+                target: "https://crmdc.mysteelcms.com/", //生产
+                changeOrigin: true, //开启跨域
             }
         }
     },
-
-    // 配置其他插件
-    pluginOptions: {
-        // 引入全局less样式
-        'style-resources-loader': {
-            preProcessor: 'less',
-            patterns: [
-                path.resolve(__dirname, './src/assets/common.less')
-            ]
-        }
-    }
 }
