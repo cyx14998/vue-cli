@@ -18,8 +18,13 @@
       </el-form>
     </div>
     <div class="action-btns marginb-10">
-      <el-button size="small">框架模板下载</el-button>
-      <el-button type="primary" size="small">框架导入</el-button>
+      <div class="btn-flex">
+        <el-button size="small">框架模板下载</el-button>
+        <el-button type="primary" size="small">框架导入</el-button>
+      </div>
+      <div>
+        <el-button type="primary" size="small">新增框架</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -60,5 +65,10 @@ export default {
   .el-form-item {
     margin-bottom: 10px;
   }
+}
+
+.action-btns {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

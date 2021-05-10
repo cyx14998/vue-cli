@@ -420,7 +420,8 @@ th {
 
 .el-input,
 .el-tree-node__label,
-.el-tabs__item {
+.el-tabs__item,
+.el-button {
   font-size: 12px;
 }
 
@@ -430,6 +431,22 @@ th {
 
 .marginb-10 {
   margin-bottom: 10px;
+}
+
+.el-table th {
+  white-space: nowrap;
+  overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: left;
+  background-color: #0c69b3;
+}
+
+.el-table th>.cell {
+  font-size: 14px !important;
+  color: #fff !important;
 }
 
 .el-button--small,
