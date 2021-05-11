@@ -453,3 +453,21 @@ th {
 .el-button--small.is-roun {
   padding: 7px 12px;
 }
+
+.el-table td,
+.el-table th {
+  padding: 4px 0;
+}
+
+.displayi-b {
+  display: inline-block;
+}
+
+.marinl5,
+.el-button+.el-button {
+  margin-left: 5px;
+}
+
+.el-button [class*=el-icon-]+span {
+  margin-left: 0;
+}

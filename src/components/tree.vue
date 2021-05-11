@@ -1,3 +1,4 @@
+// 左侧树状图 和tab
 <template>
   <div class="tree">
     <div class="treeContainer">
@@ -45,10 +46,10 @@ export default {
         this.id = 2
         // 范围框架 调用接口
       }
+      this.$store.dispatch('setActiveName', e.name)
       this.getAllNodesById(this.id)
     },
     getAllNodesById (nodeId) {
-      console.log(nodeId);
       //获取树的所有节点
       this.$api
         .get("/api/macroeconomy/menuTree/getAllNodesContainControlById", {

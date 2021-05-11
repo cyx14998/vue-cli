@@ -34,14 +34,14 @@ export default {
       let bH = document.body.offsetHeight;
       let sH = this.$refs.frame.$el.getBoundingClientRect().top;
       let domH = this.$refs.frame.$refs.botAction.offsetHeight;
-      this.tableHeight = bH - sH - domH - 34
+      this.tableHeight = bH - sH - domH - 62
     })
     let self = this
     window.onresize = () => {
       let bH = document.body.offsetHeight;
       let sH = self.$refs.frame.$el.getBoundingClientRect().top;
       let domH = self.$refs.frame.$refs.botAction.offsetHeight;
-      self.tableHeight = bH - sH - domH - 34
+      self.tableHeight = bH - sH - domH - 62
     }
   },
   data () {

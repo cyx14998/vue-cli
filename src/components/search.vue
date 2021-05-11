@@ -1,12 +1,13 @@
+// 头部搜索
 <template>
   <div class="right-top-part">
     <div class="search-part marginb-10">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item>
-          <el-input v-model="formInline.user" placeholder="框架名称"></el-input>
+          <el-input v-model="formInline.name" placeholder="框架名称"></el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select class="width-100" v-model="formInline.region" placeholder="状态">
+          <el-select class="width-100" v-model="formInline.status" placeholder="状态">
             <el-option label="全部" value="0"></el-option>
             <el-option label="启用" value="1"></el-option>
             <el-option label="停用" value="2"></el-option>
@@ -16,15 +17,6 @@
           <el-button type="primary" size="small" icon="el-icon-search" @click="onSubmit">查询</el-button>
         </el-form-item>
       </el-form>
-    </div>
-    <div class="action-btns marginb-10">
-      <div class="btn-flex">
-        <el-button size="small">框架模板下载</el-button>
-        <el-button type="primary" size="small">框架导入</el-button>
-      </div>
-      <div>
-        <el-button type="primary" size="small">新增框架</el-button>
-      </div>
     </div>
   </div>
 </template>
@@ -37,8 +29,8 @@ export default {
   data () {
     return {
       formInline: {
-        user: '',
-        region: '0'
+        name: '',
+        status: '0'
       }
     };
   },
@@ -54,6 +46,7 @@ export default {
   methods: {
     onSubmit () {
       console.log('submit!');
+      console.log(this.formInline)
     }
   }
 };
