@@ -8,7 +8,6 @@
       <Tree id="1" ref="nodeTree" @getTableData="getTableData" />
     </diV>
     <div id="right">
-      <Search ref="search" />
       <div v-if="showTable">
         <Table ref="tablePage" :tableHeight="tableHeight" />
       </div>
@@ -17,13 +16,11 @@
 </template>
 
 <script>
-import Tree from "../components/tree.vue";
-import Search from "../components/search.vue";
-import Table from "../components/table.vue";
+import Tree from "../glComponents/tree";
+import Table from "../glComponents/table";
 export default {
   components: {
     Tree,
-    Search,
     Table,
   },
   created () {

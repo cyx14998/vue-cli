@@ -26,11 +26,11 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marinl5 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
+              <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
                 :confirm="changeNodeStatus(scope.row)">
                 <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
               </el-popconfirm>
-              <el-popconfirm class="marinl5 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
                 <el-button type="text" slot="reference">启用</el-button>
               </el-popconfirm>
               <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
@@ -50,11 +50,11 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="rangeModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marinl5 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus === 1"
+              <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus === 1"
                 :confirm="changeNodeStatus(scope.row)">
                 <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
               </el-popconfirm>
-              <el-popconfirm class="marinl5 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
                 <el-button type="text" slot="reference">启用</el-button>
               </el-popconfirm>
               <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
@@ -76,26 +76,26 @@
           </el-col>
         </div>
       </div>
-      <IndicatorModal v-if="indicatorModalVisible" :visible="indicatorModalVisible" @close="indicatorModalClose"
+      <IndicatorDialog v-if="indicatorDialogVisible" :visible="indicatorDialogVisible" @close="indicatorDialogClose"
         :indicatorData="indicatorData">
-      </IndicatorModal>
-      <RangeModal v-if="rangeModalVisible" :visible="rangeModalVisible" @close="rangeModalClose" :rangeData="rangeData">
-      </RangeModal>
+      </IndicatorDialog>
+      <RangeDialog v-if="rangeDialogVisible" :visible="rangeDialogVisible" @close="rangeDialogClose" :rangeData="rangeData">
+      </RangeDialog>
     </el-drawer>
   </div>
 </template>
 
 <script>
-import IndicatorModal from './indicatorModal'
-import RangeModal from './rangeModal'
+import IndicatorDialog from './indicatorDialog'
+import RangeDialog from './rangeDialog'
 export default {
   name: "RoutePage",
   props: {
     visible: Boolean
   },
   components: {
-    IndicatorModal,
-    RangeModal
+    IndicatorDialog,
+    RangeDialog
   },
   data () {
     return {
@@ -110,9 +110,9 @@ export default {
       multipleSelection: [],
       page: 1,
       zb_tableHeight: 0,
-      rangeModalVisible: false, // 范围弹窗visible
+      rangeDialogVisible: false, // 范围弹窗visible
       rangeData: {}, // 范围弹窗数据
-      indicatorModalVisible: false, // 指标弹窗visible
+      indicatorDialogVisible: false, // 指标弹窗visible
       indicatorData: {}, // 指标弹窗数据
     };
   },
@@ -162,10 +162,10 @@ export default {
         flag,
         title: flag === 1 ? '新增范围' : '编辑范围'
       }
-      this.rangeModalVisible = true
+      this.rangeDialogVisible = true
     },
-    rangeModalClose () {
-      this.rangeModalVisible = false
+    rangeDialogClose () {
+      this.rangeDialogVisible = false
     },
     // 指标 新增||编辑 弹窗
     indicatorModal (flag, data) {
@@ -174,10 +174,10 @@ export default {
         flag,
         title: flag === 1 ? '新增指标' : '编辑指标'
       }
-      this.indicatorModalVisible = true
+      this.indicatorDialogVisible = true
     },
-    indicatorModalClose () {
-      this.indicatorModalVisible = false
+    indicatorDialogClose () {
+      this.indicatorDialogVisible = false
     },
 
     changeNodeStatus () {

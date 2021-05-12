@@ -20,6 +20,13 @@ export default new Router({
             meta: {
                 title: '数据浏览器后台'
             }
+        }, {
+            path: '/glIndex',
+            name: 'glIndex',
+            component: resolve => require(["./pages/glIndex.vue"], resolve),
+            meta: {
+                title: '钢联模板后台'
+            }
         }
     ]
 })

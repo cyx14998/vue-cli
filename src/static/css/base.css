@@ -463,9 +463,9 @@ th {
   display: inline-block;
 }
 
-.marinl5,
+.marginl10,
 .el-button+.el-button {
-  margin-left: 5px;
+  margin-left: 10px;
 }
 
 .el-button [class*=el-icon-]+span {

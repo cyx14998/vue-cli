@@ -2,12 +2,9 @@
 <template>
   <div class="indexTable" ref="indexRef">
     <div class="action-btns marginb-10">
-      <div class="btn-flex">
-        <el-button size="small">框架模板下载</el-button>
-        <el-button type="primary" size="small">框架导入</el-button>
-      </div>
       <div>
         <el-button type="primary" size="small" @click="editNode(1,{})">新增框架</el-button>
+        <el-button type="primary" size="small" @click="openIndexFrameModal()">关联模板</el-button>
       </div>
     </div>
     <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark"
@@ -34,21 +31,17 @@
       </el-table-column>
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
-          <el-button class="marinl5" type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-button class="marinl5" type="text" v-if="activeName === 'indexFrame'"
-            @click="openIndexFrameModal(scope.row)">指标
-          </el-button>
-          <el-button type="text" v-else @click="openIndexFrameModal(scope.row)">范围</el-button>
-          <el-popconfirm class="marinl5 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
+          <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
+          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
             :confirm="changeNodeStatus(scope.row)">
-            <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
+            <el-button class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
-          <el-popconfirm class="marinl5 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
             <el-button type="text" slot="reference">启用</el-button>
           </el-popconfirm>
-          <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
-            @click="changeNodeStatus(scope.row)">停用</el-button>
-          <el-button type="text" v-else @click="changeNodeStatus(scope.row)">启用</el-button> -->
+          <el-popconfirm class="marginl10 displayi-b" title="是否删除?" :confirm="changeNodeStatus(scope.row)">
+            <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">删除</el-button>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -63,22 +56,22 @@
         </el-pagination>
       </el-col>
     </div>
-    <RoutePage v-if="routePageVisible" :visible="routePageVisible" @close="routePageClose" />
-    <FrameModal v-if="frameModalVisible" :visible="frameModalVisible" @close="frameModalClose" :frameData="frameData" />
+    <Route v-if="routePageVisible" :visible="routePageVisible" @close="routePageClose" />
+    <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose" :frameData="frameData" />
   </div>
 </template>
 
 <script>
-import RoutePage from '../components/routePage'
-import FrameModal from '../components/frameModal'
+import Route from './route'
+import FrameDialog from './frameDialog'
 export default {
   name: "TablePage",
   props: {
     tableHeight: Number
   },
   components: {
-    RoutePage,
-    FrameModal
+    Route,
+    FrameDialog
   },
   data () {
     return {
@@ -94,7 +87,7 @@ export default {
       multipleSelection: [],
       page: 1,
       routePageVisible: false, // 指标||范围 drawer
-      frameModalVisible: false, // 新增||编辑 框架dialog
+      frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
     };
   },
@@ -127,8 +120,8 @@ export default {
     routePageClose () {
       this.routePageVisible = false
     },
-    frameModalClose () {
-      this.frameModalVisible = false
+    frameDialogClose () {
+      this.frameDialogVisible = false
     },
     editNode (flag, data) {
       this.frameData = {
@@ -138,7 +131,7 @@ export default {
         sort: flag === 2 ? '' + data.sort : 1,
         title: flag === 1 ? '新增框架' : '编辑框架'
       }
-      this.frameModalVisible = true
+      this.frameDialogVisible = true
     },
     // 打开指标页面
     openIndexFrameModal (data) {
@@ -179,8 +172,7 @@ export default {
 
 <style scoped lang="less">
 .action-btns {
-  display: flex;
-  justify-content: space-between;
+  text-align: right;
 }
 .batch-withdraw {
   margin-top: 10px;
