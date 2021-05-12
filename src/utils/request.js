@@ -42,17 +42,17 @@ export default (options) => {
     });
 
     //响应拦截
-    axios.interceptors.response.use(response => {
-        if (response.headers && response.headers.token) {
-            localStorage.setItem('token', response.headers.token)
-        }
-        if (response.data.statusCode == 20009) {  //这里的状态码是根据后台设置的来
-            Message.error({ message: '登录过期，请重新登录' })
-        }
-        return response;
-    }, error => {
-        return Promise.resolve(error.response)
-    })
+    // axios.interceptors.response.use(response => {
+    //     if (response.headers && response.headers.token) {
+    //         localStorage.setItem('token', response.headers.token)
+    //     }
+    //     if (response.data.statusCode == 20009) {  //这里的状态码是根据后台设置的来
+    //         Message.error({ message: '登录过期，请重新登录' })
+    //     }
+    //     return response;
+    // }, error => {
+    //     return Promise.resolve(error.response)
+    // })
 
     //发送请求
     return new Promise((resolve, reject) => {
@@ -61,10 +61,11 @@ export default (options) => {
             method,
             url: url,
             data: params,
-            timeout: 6000
+            timeout: 1000 * 10
         }).then(result => {
             result && result.data ? resolve(result.data) : reject(result)
         }).catch(err => {
+            Message.error(err)
             reject(err)
         })
     })

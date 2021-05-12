@@ -2,8 +2,8 @@
 <template>
   <div class="tree">
     <div class="treeContainer">
-      <el-tree :data="data" node-key="nodeId" :expand-on-click-node="false" :props="defaultProps"
-        :default-expanded-keys="defaultExpendKeys" @node-click="nodeClick">
+      <el-tree :data="data" ref="tree" node-key="id" :load="loadNode" lazy :expand-on-click-node="false"
+        :props="defaultProps" @node-click="nodeClick" highlight-current>
       </el-tree>
     </div>
   </div>
@@ -19,42 +19,93 @@ export default {
       id: 1,
       data: [],
       defaultProps: {
-        children: "nodeInfo",
-        label: "nodeName"
+        children: "children",
+        label: "title",
+        value: 'id'
       },
-      defaultExpendKeys: [],
     };
   },
   computed: {
     browsersType () {
       return this.$store.getters.getBrowsersType
+    },
+    nodeId () {
+      return this.$store.getters.getNodeId
     }
   },
   watch: {
     // 监听浏览器类型改变
     browsersType () {
-      this.getAllNodesById(this.id)
+      this.getAllNodesById()
       this.$emit('getTableData')
     },
   },
   methods: {
-    getAllNodesById (nodeId) {
+    getAllNodesById () {
       //获取树的所有节点
-      this.$api
-        .get("/api/macroeconomy/menuTree/getAllNodesContainControlById", {
-          nodeId: this.id
-        })
-        .then(({ data: { code, success, data } }) => {
-          this.defaultExpendKeys = nodeId ? [Number(nodeId)] : [data.nodeId];
-          this.data = [data];
-        });
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        method: 'get',
+        params: {
+          sectionType: 1,
+          id: -1,
+        }
+      }).then((res) => {
+        if (res && res.success) {
+          this.data = res.data
+        }
+      });
+
     },
-    nodeClick ({ nodeId, controlId }) {
-      console.log(nodeId)
+    // append方法在lazy模式下不起作用，只能用这种方式
+    loadNode (node, resolve) {
+      node.resolve = resolve;// 注意看这里
+      if (node.level === 0) { // 正要但没创建根节点时
+        node.resolve = resolve; // 注意看这里
+        return resolve(this.data);
+      }
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        method: 'get',
+        params: {
+          sectionType: 1,
+          id: node.data.id,
+        }
+      }).then((res) => {
+        if (res && res.success) {
+          return resolve(res.data);
+        }
+      });
+    },
+    nodeClick (nodeObj, node) {
+      this.node = node
+      this.$store.dispatch('setNodeId', nodeObj.id)
+    },
+    // 新增框架后 处理tree（append方法在lazy模式下不起作用，只能用这种方式）
+    dealAddNode (nodeObj) {
+      let node = this.node
+      if (node) {
+        let children = [];
+        children.push(nodeObj);
+        node.childNodes.forEach(d => children.push(d.data));
+        node.resolve && node.resolve(children);
+      } else {
+        this.getAllNodesById()
+      }
+    },
+    // 编辑框架
+    dealEditNode (nodeObj) {
+      this.$refs.tree.remove(nodeObj)
+      this.dealAddNode(nodeObj)
+    },
+    // 批量删除后 处理tree
+    dealDelNode (nodeArr) {
+      nodeArr.map(item => {
+        this.$refs.tree.remove(item)
+      })
     }
   },
   created () {
-    this.getAllNodesById();
   }
 };
 </script>

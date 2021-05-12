@@ -1,2 +1,2 @@
-const baseUrl = window.location.origin + '/proxy'
+const baseUrl = ''
 export default baseUrl

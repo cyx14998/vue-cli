@@ -8,6 +8,7 @@ const state = {
         name: '',
         status: '0'
     },  // 查询筛选 params
+    nodeId: -1,
 }
 const getters = {
     getBrowsersType: state => {
@@ -18,6 +19,9 @@ const getters = {
     },
     getFilterParams: state => {
         return state.filterParams;
+    },
+    getNodeId: state => {
+        return state.nodeId;
     }
 }
 const mutations = {
@@ -29,6 +33,9 @@ const mutations = {
     },
     setFilterParams (state, filterParams) {
         state.filterParams = filterParams;
+    },
+    setNodeId (state, nodeId) {
+        state.nodeId = nodeId;
     }
 }
 const actions = {
@@ -40,6 +47,9 @@ const actions = {
     },
     setFilterParams (context, filterParams) {
         context.commit('setFilterParams', filterParams);
+    },
+    setNodeId (context, nodeId) {
+        context.commit('setNodeId', nodeId);
     }
 }
 export default new Vuex.Store({

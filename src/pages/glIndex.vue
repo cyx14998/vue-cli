@@ -2,10 +2,10 @@
   <div id="el-main">
     <diV id="left">
       <el-select v-model="value" placeholder="请选择" @change="onChange">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+        <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.name">
         </el-option>
       </el-select>
-      <Tree id="1" ref="nodeTree" @getTableData="getTableData" />
+      <Tree ref="nodeTree" @getTableData="getTableData" />
     </diV>
     <div id="right">
       <div v-if="showTable">
@@ -16,49 +16,61 @@
 </template>
 
 <script>
-import Tree from "../glComponents/tree";
-import Table from "../glComponents/table";
+import Tree from "../glComponents/tree"
+import Table from "../glComponents/table"
+
 export default {
   components: {
     Tree,
     Table,
   },
-  created () {
-  },
-  mounted () {
-    this.showTable = true
-    this.$nextTick(() => {
-      let bH = document.body.offsetHeight;
-      let sH = this.$refs.tablePage.$el.getBoundingClientRect().top;
-      let domH = this.$refs.tablePage.$refs.botAction.offsetHeight;
-      this.tableHeight = bH - sH - domH - 62
-    })
-    let self = this
-    window.onresize = () => {
-      let bH = document.body.offsetHeight;
-      let sH = self.$refs.tablePage.$el.getBoundingClientRect().top;
-      let domH = self.$refs.tablePage.$refs.botAction.offsetHeight;
-      self.tableHeight = bH - sH - domH - 62
-    }
-  },
   data () {
     return {
       showTable: false,
-      options: [{
-        value: '1',
-        label: '期货数据浏览器'
-      }, {
-        value: '2',
-        label: '行情数据浏览器'
-      }, {
-        value: '3',
-        label: '宏观数据浏览器'
-      }],
-      value: '1',
+      options: [],
+      value: '',
       tableHeight: 0,
     };
   },
+  created () {
+  },
+  mounted () {
+    this.getSelectData()
+    this.showTable = true
+    this.$nextTick(() => {
+      let bH = document.body.offsetHeight
+      let sH = this.$refs.tablePage.$el.getBoundingClientRect().top
+      let domH = this.$refs.tablePage.$refs.botAction.offsetHeight
+      this.tableHeight = bH - sH - domH - 82
+    })
+    let self = this
+    window.onresize = () => {
+      let bH = document.body.offsetHeight
+      let sH = self.$refs.tablePage.$el.getBoundingClientRect().top
+      let domH = self.$refs.tablePage.$refs.botAction.offsetHeight
+      self.tableHeight = bH - sH - domH - 82
+    }
+  },
   methods: {
+    getSelectData () {
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadSectionSelectList',
+        method: 'get',
+      }).then((res) => {
+        if (res && res.success) {
+          this.options = res.data
+          if (res.data && res.data.length) {
+            this.value = res.data[0].name
+            // this.$store.dispatch('setNodeId', res.data[0].id)
+            this.$nextTick(() => {
+              this.$refs.nodeTree.getAllNodesById()
+            })
+          }
+        } else {
+          this.$message.error(res.message || '获取下拉框板块出错!')
+        }
+      });
+    },
     onChange (val) {
       this.$store.dispatch('setBrowsersType', val)
       this.$store.dispatch('setActiveName', 'indexFrame')
@@ -67,7 +79,7 @@ export default {
       this.$refs.tablePage.getData()
     },
     refreshTree (nodeId) {
-      this.$refs.nodeTree.getAllNodesById(nodeId);
+      this.$refs.nodeTree.getAllNodesById(nodeId)
     }
   }
 };

@@ -4,10 +4,10 @@ import router from './router'
 import './theme/index.css'
 import ElementUI from 'element-ui';
 import "./static/css/base.css";
+import $http from './utils/request'
+Vue.prototype.$http = $http
 Vue.config.productionTip = false
-import api from './api/index'
 import store from './vuex/vuex.js'
-Vue.prototype.$api = api
 router.beforeEach((to, from, next) => {
   /* 路由发生变化修改页面title */
   if (to.meta.title) {

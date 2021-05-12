@@ -7,7 +7,7 @@
         <el-button type="primary" size="small" @click="openIndexFrameModal()">关联模板</el-button>
       </div>
     </div>
-    <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark"
+    <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark" v-loading="loading"
       :style="{width: '100%', height: tableHeight + 'px'}" :height="tableHeight"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55">
@@ -15,31 +15,32 @@
       <el-table-column label="框架ID">
         <template slot-scope="scope">{{ scope.row.id }}</template>
       </el-table-column>
-      <el-table-column prop="cnName" label="框架中文名称" show-overflow-tooltip>
+      <el-table-column prop="title" label="框架中文名称" show-overflow-tooltip>
       </el-table-column>
       <el-table-column prop="enName" label="框架英文名称" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column prop="route" label="框架路径">
+      <el-table-column prop="path" label="框架路径">
       </el-table-column>
       <el-table-column prop="isLeaf" label="是否叶子节点" width="106">
         <template slot-scope="scope">{{ scope.row.isLeaf ? '是' : '否' }}</template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="50">
-        <template slot-scope="scope">{{ scope.row.status === 1 ? '启用' : '停用' }}</template>
+        <template slot-scope="scope">{{ scope.row.status ? '启用' : '停用' }}</template>
       </el-table-column>
-      <el-table-column prop="sort" label="排序" width="50">
+      <el-table-column prop="sortNo" label="排序" width="50">
       </el-table-column>
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
-            :confirm="changeNodeStatus(scope.row)">
+          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.status"
+            @confirm="()=>{changeNodeStatus(1,scope.row)}">
             <el-button class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
-          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
+            @confirm="()=>{changeNodeStatus(2,scope.row)}">
             <el-button type="text" slot="reference">启用</el-button>
           </el-popconfirm>
-          <el-popconfirm class="marginl10 displayi-b" title="是否删除?" :confirm="changeNodeStatus(scope.row)">
+          <el-popconfirm class="marginl10 displayi-b" title="是否删除?" @confirm="()=>{changeNodeStatus(3,scope.row)}">
             <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">删除</el-button>
           </el-popconfirm>
         </template>
@@ -50,14 +51,15 @@
         <el-button type="primary" size="small" :disabled="!multipleSelection.length" @click="mulDel">批量删除</el-button>
       </el-col>
       <el-col :span="16" class="align-right">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
-          :page-sizes="[10, 20, 50, 100]" :page-size="100" layout="total, sizes, prev, pager, next, jumper"
-          :total="400">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+          :current-page="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
+          layout="total, sizes, prev, pager, next, jumper" :total="pageParams.total">
         </el-pagination>
       </el-col>
     </div>
     <Route v-if="routePageVisible" :visible="routePageVisible" @close="routePageClose" />
-    <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose" :frameData="frameData" />
+    <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
+      :frameData="frameData" />
   </div>
 </template>
 
@@ -75,20 +77,17 @@ export default {
   },
   data () {
     return {
-      tableData: [{
-        id: 110100000000,
-        cnName: '基本资料',
-        enName: 'base data',
-        route: '指标框架|第二层',
-        isLeaf: 1,
-        status: 1,
-        sort: 1
-      }],
-      multipleSelection: [],
-      page: 1,
+      tableData: [],
+      multipleSelection: [], // 多选
+      pageParams: { // 分页参数obj
+        pageNo: 1,
+        pageSize: 10,
+        total: 0,
+      },
       routePageVisible: false, // 指标||范围 drawer
       frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
+      loading: false,
     };
   },
   created () {
@@ -98,8 +97,14 @@ export default {
     activeName () {
       return this.$store.getters.getActiveName
     },
+    nodeId () {
+      return this.$store.getters.getNodeId
+    },
   },
   watch: {
+    nodeId () {
+      this.getData()
+    }
   },
   mounted () {
     this.getData()
@@ -107,15 +112,28 @@ export default {
   methods: {
     getData () {
       this.multipleSelection = []
-      const filterParams = this.$store.getters.getFilterParams
-      console.log(filterParams)
-      let data = []
-      for (let i = 0; i < 400; i++) {
-        let d = Object.assign({}, this.tableData[0])
-        d.id = i
-        data.push(d)
-      }
-      this.tableData = data
+      const { pageNo, pageSize } = this.pageParams
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadFrameworkByPage',
+        method: 'get',
+        params: {
+          sectionType: 1,
+          id: this.nodeId,
+          pageNo,
+          pageSize,
+        }
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          const { total, records } = res.data
+          this.tableData = records
+          this.pageParams = {
+            ...this.pageParams,
+            total,
+          }
+        }
+      });
     },
     routePageClose () {
       this.routePageVisible = false
@@ -126,10 +144,9 @@ export default {
     editNode (flag, data) {
       this.frameData = {
         ...data,
-        isLeaf: flag === 2 ? '' + data.isLeaf : '',
         flag,
-        sort: flag === 2 ? '' + data.sort : 1,
-        title: flag === 1 ? '新增框架' : '编辑框架'
+        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        headTitle: flag === 1 ? '新增框架' : '编辑框架'
       }
       this.frameDialogVisible = true
     },
@@ -138,9 +155,55 @@ export default {
       console.log(data)
       this.routePageVisible = true
     },
-    handleSizeChange () { },
-    changeNodeStatus () { },
-    handleCurrentChange () { },
+    // 停用1||启用2||删除3
+    changeNodeStatus (flag, node) {
+      this.loading = true
+      // console.log(flag, node)
+      let ids = [node.id]
+      if (flag === 3) {
+        this.$http({
+          url: '/api/databrowser/glTemplate/batchDeleteFramework',
+          method: 'post',
+          params: JSON.stringify(ids)
+        }).then((res) => {
+          this.loading = false
+          if (res && res.success) {
+            this.$message.success(res.message);
+            this.$parent.$refs.nodeTree.dealDelNode([node])
+            this.$nextTick(() => {
+              this.getData()
+            })
+          } else {
+            this.$message({
+              type: 'error',
+              message: res.message
+            });
+          }
+        }).catch((err) => {
+          this.loading = false
+          this.$message({
+            type: 'error',
+            message: err
+          });
+        });
+      }
+    },
+    // 每页显示多少 change
+    handleSizeChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageSize: val
+      }
+      this.getData()
+    },
+    // 页码change
+    handleCurrentChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageNo: val
+      }
+      this.getData()
+    },
     toggleSelection (rows) {
       if (rows) {
         rows.forEach(row => {
@@ -153,16 +216,50 @@ export default {
     handleSelectionChange (val) {
       this.multipleSelection = val;
     },
+    changeLoading (flag) {
+      this.loading = flag
+    },
     mulDel () {
       this.$alert('是否删除?', '删除', {
         // showCancelButton: true,
         confirmButtonText: '确定',
         // cancelButtonText: '取消',
         callback: action => {
-          this.$message({
-            type: 'info',
-            message: `action: ${action}`
-          });
+          this.loading = true
+          let ids = []
+          this.multipleSelection.map(item => {
+            ids.push(item.id)
+          })
+          if (action === 'confirm') {
+            this.$http({
+              url: '/api/databrowser/glTemplate/batchDeleteFramework',
+              method: 'post',
+              params: JSON.stringify(ids)
+            }).then((res) => {
+              this.loading = false
+              if (res && res.success) {
+                this.$message({
+                  type: 'success',
+                  message: res.message
+                });
+                this.$parent.$refs.nodeTree.dealDelNode(this.multipleSelection)
+                this.$nextTick(() => {
+                  this.getData()
+                })
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.message
+                });
+              }
+            }).catch((err) => {
+              this.loading = false
+              this.$message({
+                type: 'error',
+                message: err
+              });
+            });
+          }
         }
       });
     }
