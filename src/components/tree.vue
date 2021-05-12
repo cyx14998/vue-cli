@@ -39,12 +39,22 @@ export default {
   computed: {
     newActiveName () {
       return this.$store.getters.getActiveName
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
     }
   },
   watch: {
+    // 监听框架切换
     newActiveName (val) {
       this.activeName = val
-    }
+      this.$emit('getTableData')
+    },
+    // 监听浏览器类型改变
+    browsersType () {
+      this.getAllNodesById(this.id)
+      this.$emit('getTableData')
+    },
   },
   methods: {
     tabChange (e) {

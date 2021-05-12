@@ -105,28 +105,15 @@ export default {
     activeName () {
       return this.$store.getters.getActiveName
     },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    }
   },
   watch: {
-    // 监听框架切换
-    activeName (newVal, oldVal) {
-      console.log(newVal, oldVal)
-      this.multipleSelection = []
-      this.getData()
-    },
-    // 监听浏览器类型改变
-    browsersType () {
-      this.multipleSelection = []
-      this.getData()
-    },
   },
   mounted () {
     this.getData()
   },
   methods: {
     getData () {
+      this.multipleSelection = []
       const filterParams = this.$store.getters.getFilterParams
       console.log(filterParams)
       let data = []

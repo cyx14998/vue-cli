@@ -5,12 +5,12 @@
         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
-      <Tree id="1" ref="nodeTree" />
+      <Tree id="1" ref="nodeTree" @getTableData="getTableData" />
     </diV>
     <div id="right">
       <Search ref="search" />
       <div v-if="showTable">
-        <TablePage ref="frame" :tableHeight="tableHeight" />
+        <TablePage ref="tablePage" :tableHeight="tableHeight" />
       </div>
     </div>
   </div>
@@ -32,15 +32,15 @@ export default {
     this.showTable = true
     this.$nextTick(() => {
       let bH = document.body.offsetHeight;
-      let sH = this.$refs.frame.$el.getBoundingClientRect().top;
-      let domH = this.$refs.frame.$refs.botAction.offsetHeight;
+      let sH = this.$refs.tablePage.$el.getBoundingClientRect().top;
+      let domH = this.$refs.tablePage.$refs.botAction.offsetHeight;
       this.tableHeight = bH - sH - domH - 62
     })
     let self = this
     window.onresize = () => {
       let bH = document.body.offsetHeight;
-      let sH = self.$refs.frame.$el.getBoundingClientRect().top;
-      let domH = self.$refs.frame.$refs.botAction.offsetHeight;
+      let sH = self.$refs.tablePage.$el.getBoundingClientRect().top;
+      let domH = self.$refs.tablePage.$refs.botAction.offsetHeight;
       self.tableHeight = bH - sH - domH - 62
     }
   },
@@ -65,6 +65,9 @@ export default {
     onChange (val) {
       this.$store.dispatch('setBrowsersType', val)
       this.$store.dispatch('setActiveName', 'indexFrame')
+    },
+    getTableData () {
+      this.$refs.tablePage.getData()
     },
     refreshTree (nodeId) {
       this.$refs.nodeTree.getAllNodesById(nodeId);
