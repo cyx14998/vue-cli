@@ -1,7 +1,7 @@
 <template>
   <div id="el-main">
     <diV id="left">
-      <el-select v-model="value" placeholder="请选择">
+      <el-select v-model="value" placeholder="请选择" @change="onChange">
         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
@@ -10,7 +10,7 @@
     <div id="right">
       <Search ref="search" />
       <div v-if="showTable">
-        <IndexFrame ref="frame" :tableHeight="tableHeight" />
+        <TablePage ref="frame" :tableHeight="tableHeight" />
       </div>
     </div>
   </div>
@@ -19,12 +19,12 @@
 <script>
 import Tree from "../components/tree.vue";
 import Search from "../components/search.vue";
-import IndexFrame from "../components/indexFrame.vue";
+import TablePage from "../components/tablePage.vue";
 export default {
   components: {
     Tree,
     Search,
-    IndexFrame,
+    TablePage,
   },
   created () {
   },
@@ -62,6 +62,10 @@ export default {
     };
   },
   methods: {
+    onChange (val) {
+      this.$store.dispatch('setBrowsersType', val)
+      this.$store.dispatch('setActiveName', 'indexFrame')
+    },
     refreshTree (nodeId) {
       this.$refs.nodeTree.getAllNodesById(nodeId);
     }

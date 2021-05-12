@@ -7,7 +7,7 @@
         <el-button type="primary" size="small">框架导入</el-button>
       </div>
       <div>
-        <el-button type="primary" size="small" @click="editNode(1)">新增框架</el-button>
+        <el-button type="primary" size="small" @click="editNode(1,{})">新增框架</el-button>
       </div>
     </div>
     <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark"
@@ -15,19 +15,20 @@
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column label="框架ID" width="120">
+      <el-table-column label="框架ID">
         <template slot-scope="scope">{{ scope.row.id }}</template>
       </el-table-column>
-      <el-table-column prop="cnName" label="框架中文名称" width="120" show-overflow-tooltip>
+      <el-table-column prop="cnName" label="框架中文名称" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column prop="enName" label="框架英文名称" width="120" show-overflow-tooltip>
+      <el-table-column prop="enName" label="框架英文名称" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column prop="route" label="框架路径" width="200">
+      <el-table-column prop="route" label="框架路径">
       </el-table-column>
       <el-table-column prop="isLeaf" label="是否叶子节点" width="106">
         <template slot-scope="scope">{{ scope.row.isLeaf ? '是' : '否' }}</template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="50">
+        <template slot-scope="scope">{{ scope.row.status === 1 ? '启用' : '停用' }}</template>
       </el-table-column>
       <el-table-column prop="sort" label="排序" width="50">
       </el-table-column>
@@ -62,21 +63,21 @@
         </el-pagination>
       </el-col>
     </div>
-    <IndexModal v-if="indexFrameVisible" :visible="indexFrameVisible" @close="indexModalClose" />
+    <RoutePage v-if="routePageVisible" :visible="routePageVisible" @close="routePageClose" />
     <FrameModal v-if="frameModalVisible" :visible="frameModalVisible" @close="frameModalClose" :frameData="frameData" />
   </div>
 </template>
 
 <script>
-import IndexModal from '../components/indexModal'
+import RoutePage from '../components/routePage'
 import FrameModal from '../components/frameModal'
 export default {
-  name: "IndexFrame",
+  name: "TablePage",
   props: {
     tableHeight: Number
   },
   components: {
-    IndexModal,
+    RoutePage,
     FrameModal
   },
   data () {
@@ -92,7 +93,7 @@ export default {
       }],
       multipleSelection: [],
       page: 1,
-      indexFrameVisible: false, // 指标||范围 drawer
+      routePageVisible: false, // 指标||范围 drawer
       frameModalVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
     };
@@ -103,25 +104,41 @@ export default {
   computed: {
     activeName () {
       return this.$store.getters.getActiveName
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
     }
   },
   watch: {
+    // 监听框架切换
     activeName (newVal, oldVal) {
-      console.log(oldVal)
-    }
+      console.log(newVal, oldVal)
+      this.multipleSelection = []
+      this.getData()
+    },
+    // 监听浏览器类型改变
+    browsersType () {
+      this.multipleSelection = []
+      this.getData()
+    },
   },
   mounted () {
-    let data = []
-    for (let i = 0; i < 400; i++) {
-      let d = Object.assign({}, this.tableData[0])
-      d.id = i
-      data.push(d)
-    }
-    this.tableData = data
+    this.getData()
   },
   methods: {
-    indexModalClose () {
-      this.indexFrameVisible = false
+    getData () {
+      const filterParams = this.$store.getters.getFilterParams
+      console.log(filterParams)
+      let data = []
+      for (let i = 0; i < 400; i++) {
+        let d = Object.assign({}, this.tableData[0])
+        d.id = i
+        data.push(d)
+      }
+      this.tableData = data
+    },
+    routePageClose () {
+      this.routePageVisible = false
     },
     frameModalClose () {
       this.frameModalVisible = false
@@ -131,6 +148,7 @@ export default {
         ...data,
         isLeaf: flag === 2 ? '' + data.isLeaf : '',
         flag,
+        sort: flag === 2 ? '' + data.sort : 1,
         title: flag === 1 ? '新增框架' : '编辑框架'
       }
       this.frameModalVisible = true
@@ -138,7 +156,7 @@ export default {
     // 打开指标页面
     openIndexFrameModal (data) {
       console.log(data)
-      this.indexFrameVisible = true
+      this.routePageVisible = true
     },
     handleSizeChange () { },
     changeNodeStatus () { },

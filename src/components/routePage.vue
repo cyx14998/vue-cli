@@ -89,7 +89,7 @@
 import IndicatorModal from './indicatorModal'
 import RangeModal from './rangeModal'
 export default {
-  name: "IndexModal",
+  name: "RoutePage",
   props: {
     visible: Boolean
   },

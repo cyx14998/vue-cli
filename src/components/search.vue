@@ -4,7 +4,7 @@
     <div class="search-part marginb-10">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item>
-          <el-input v-model="formInline.name" placeholder="框架名称"></el-input>
+          <el-input v-model="formInline.name" placeholder="框架名称" :clearable="true"></el-input>
         </el-form-item>
         <el-form-item label="状态">
           <el-select class="width-100" v-model="formInline.status" placeholder="状态">
@@ -45,6 +45,7 @@ export default {
   },
   methods: {
     onSubmit () {
+      this.$store.dispatch("setFilterParams", {...this.formInline})
       console.log('submit!');
       console.log(this.formInline)
     }

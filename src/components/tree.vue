@@ -36,6 +36,16 @@ export default {
       activeName: 'indexFrame'
     };
   },
+  computed: {
+    newActiveName () {
+      return this.$store.getters.getActiveName
+    }
+  },
+  watch: {
+    newActiveName (val) {
+      this.activeName = val
+    }
+  },
   methods: {
     tabChange (e) {
       this.data = []
@@ -64,7 +74,6 @@ export default {
       console.log(nodeId)
     }
   },
-  watch: {},
   created () {
     this.getAllNodesById();
   }
