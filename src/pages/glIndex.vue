@@ -61,7 +61,7 @@ export default {
           this.options = res.data
           if (res.data && res.data.length) {
             this.value = res.data[0].name
-            // this.$store.dispatch('setNodeId', res.data[0].id)
+            this.$store.dispatch('setRoute', res.data[0].name)
             this.$nextTick(() => {
               this.$refs.nodeTree.getAllNodesById()
             })

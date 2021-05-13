@@ -9,6 +9,7 @@ const state = {
         status: '0'
     },  // 查询筛选 params
     nodeId: -1,
+    route: '', // 框架路径
 }
 const getters = {
     getBrowsersType: state => {
@@ -22,6 +23,9 @@ const getters = {
     },
     getNodeId: state => {
         return state.nodeId;
+    },
+    getRoute: state => {
+        return state.route;
     }
 }
 const mutations = {
@@ -36,6 +40,9 @@ const mutations = {
     },
     setNodeId (state, nodeId) {
         state.nodeId = nodeId;
+    },
+    setRoute (state, route) {
+        state.route = route;
     }
 }
 const actions = {
@@ -50,6 +57,9 @@ const actions = {
     },
     setNodeId (context, nodeId) {
         context.commit('setNodeId', nodeId);
+    },
+    setRoute (context, route) {
+        context.commit('setRoute', route);
     }
 }
 export default new Vuex.Store({

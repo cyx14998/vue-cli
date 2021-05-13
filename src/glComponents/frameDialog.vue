@@ -111,13 +111,9 @@ export default {
                 message: res.message
               })
             }
-          }).catch((e) => {
-            this.$message({
-              type: 'error',
-              message: e
-            })
+          }).catch(() => {
             this.$parent.changeLoading(false)
-          });
+          })
         } else {
           return false;
         }

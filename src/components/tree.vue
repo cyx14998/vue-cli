@@ -71,14 +71,26 @@ export default {
     },
     getAllNodesById (nodeId) {
       //获取树的所有节点
-      this.$api
-        .get("/api/macroeconomy/menuTree/getAllNodesContainControlById", {
-          nodeId: this.id
-        })
-        .then(({ data: { code, success, data } }) => {
-          this.defaultExpendKeys = nodeId ? [Number(nodeId)] : [data.nodeId];
-          this.data = [data];
-        });
+      // this.$http
+      //   .get("/api/macroeconomy/menuTree/getAllNodesContainControlById", {
+      //     nodeId: this.id
+      //   })
+      //   .then(({ data: { code, success, data } }) => {
+      //     this.defaultExpendKeys = nodeId ? [Number(nodeId)] : [data.nodeId];
+      //     this.data = [data];
+      //   });
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        method: 'get',
+        params: {
+          sectionType: 1,
+          id: -1,
+        }
+      }).then((res) => {
+        if (res && res.success) {
+          this.data = res.data
+        }
+      })
     },
     nodeClick ({ nodeId, controlId }) {
       console.log(nodeId)

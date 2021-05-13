@@ -4,7 +4,7 @@
     <el-drawer :visible.sync="visible" :with-header="false" size="100%">
       <div class="zb-modal-header">
         <div class="zb-modal-header__title">
-          <h3 class="zb-modal-header__text"><span>框架路径：宏观</span></h3>
+          <h3 class="zb-modal-header__text"><span>关联模板  框架路径：{{route}}</span></h3>
         </div>
         <div class="zb-modal-header__append">
           <el-button size="small" @click="closeModal">返回</el-button>
@@ -13,25 +13,17 @@
       </div>
       <div class="padding20">
         <el-table :data="tableData" ref="zb_table" size="small" border class="zb-modal-table" :height="zb_tableHeight"
-          @selection-change="handleSelectionChange">
+          v-loading="loading" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
-          <el-table-column property="id" label="指标ID" width="150"></el-table-column>
-          <el-table-column property="name" label="指标名称" width="300"></el-table-column>
-          <el-table-column property="status" label="状态"></el-table-column>
-          <el-table-column property="sort" label="排序"></el-table-column>
+          <el-table-column property="title" label="模板名称" width="300"></el-table-column>
+          <el-table-column property="sortNo" label="排序"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
-                :confirm="changeNodeStatus(scope.row)">
-                <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
+              <el-popconfirm class="marginl10 displayi-b" title="是否删除?" v-if="scope.row.nodeStatus != 1"
+                @confirm="()=>{changeNodeStatus(scope.row)}">
+                <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">删除</el-button>
               </el-popconfirm>
-              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
-                <el-button type="text" slot="reference">启用</el-button>
-              </el-popconfirm>
-              <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
-                @click="changeNodeStatus(scope.row)">停用</el-button>
-              <el-button type="text" v-else @click="changeNodeStatus(scope.row)">启用</el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -41,9 +33,9 @@
             </el-button>
           </el-col>
           <el-col :span="16" class="align-right">
-            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
-              :page-sizes="[10, 20, 50, 100]" :page-size="100" layout="total, sizes, prev, pager, next, jumper"
-              :total="400">
+            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+              :current-page="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
+              layout="total, sizes, prev, pager, next, jumper" :total="pageParams.total">
             </el-pagination>
           </el-col>
         </div>
@@ -60,37 +52,36 @@ import TemplateDialog from './templateDialog'
 export default {
   name: "RoutePage",
   props: {
-    visible: Boolean
+    visible: Boolean,
+    routeData: Object
   },
   components: {
     TemplateDialog,
   },
   data () {
     return {
-      tableData: [{
-        id: '110100000000',
-        name: '基本资料',
-        route: '指标框架|第二层',
-        isLeaf: false,
-        status: 1,
-        sort: 1
-      }],
-      multipleSelection: [],
-      page: 1,
+      tableData: [],
+      multipleSelection: [], // 多选
+      pageParams: { // 分页参数obj
+        pageNo: 1,
+        pageSize: 10,
+        total: 0,
+      },
       zb_tableHeight: 0,
       templateDialogVisible: false, // 弹窗visible
       templateData: {}, // 弹窗数据
+      loading: false,
     };
   },
   created () {
   },
   computed: {
-    activeName () {
-      return this.$store.getters.getActiveName
-    }
-  },
-  watch: {
-
+    nodeId () {
+      return this.$store.getters.getNodeId
+    },
+    route () {
+      return this.$store.getters.getRoute
+    },
   },
   mounted () {
     this.getData()
@@ -110,13 +101,31 @@ export default {
   },
   methods: {
     getData () {
-      let data = []
-      for (let i = 0; i < 40; i++) {
-        let d = Object.assign({}, this.tableData[0])
-        d.id = i
-        data.push(d)
-      }
-      this.tableData = data
+      this.multipleSelection = []
+      const { pageNo, pageSize } = this.pageParams
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
+        method: 'get',
+        params: {
+          sectionType: 1,
+          id: this.nodeId,
+          pageNo,
+          pageSize,
+        }
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          const { total, records } = res.data
+          this.tableData = records
+          this.pageParams = {
+            ...this.pageParams,
+            total,
+          }
+        }
+      }).catch(() => {
+        this.loading = false
+      })
     },
     closeModal () {
       this.$emit('close')
@@ -126,8 +135,9 @@ export default {
       this.templateData = {
         ...data,
         flag,
-        sort: data.sort || 1,
-        title: flag === 1 ? '新增模板' : '编辑模板'
+        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        templateFile: null,
+        headTitle: flag === 1 ? '新增框架' : '编辑框架'
       }
       this.templateDialogVisible = true
     },
@@ -135,13 +145,51 @@ export default {
       this.templateDialogVisible = false
     },
 
-    changeNodeStatus () {
-
+    changeNodeStatus (node) {
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+        method: 'post',
+        params: JSON.stringify([node.id])
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          this.$message({
+            type: 'success',
+            message: res.message
+          });
+          this.getData()
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          });
+        }
+      }).catch(() => {
+        this.loading = false
+      })
     },
-    handleSizeChange () { },
-    handleCurrentChange () { },
+    // 每页显示多少 change
+    handleSizeChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageSize: val
+      }
+      this.getData()
+    },
+    // 页码change
+    handleCurrentChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageNo: val
+      }
+      this.getData()
+    },
     handleSelectionChange (val) {
       this.multipleSelection = val;
+    },
+    changeLoading (flag) {
+      this.loading = flag
     },
     mulDel () {
       this.$alert('是否删除?', '删除', {
@@ -149,10 +197,34 @@ export default {
         confirmButtonText: '确定',
         // cancelButtonText: '取消',
         callback: action => {
-          this.$message({
-            type: 'info',
-            message: `action: ${action}`
-          });
+          this.loading = true
+          let ids = []
+          this.multipleSelection.map(item => {
+            ids.push(item.id)
+          })
+          if (action === 'confirm') {
+            this.$http({
+              url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+              method: 'post',
+              params: JSON.stringify(ids)
+            }).then((res) => {
+              this.loading = false
+              if (res && res.success) {
+                this.$message({
+                  type: 'success',
+                  message: res.message
+                });
+                this.getData()
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.message
+                });
+              }
+            }).catch(() => {
+              this.loading = false
+            })
+          }
         }
       });
     }

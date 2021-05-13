@@ -65,7 +65,10 @@ export default (options) => {
         }).then(result => {
             result && result.data ? resolve(result.data) : reject(result)
         }).catch(err => {
-            Message.error(err)
+            Message({
+                type: 'error',
+                message: err
+            })
             reject(err)
         })
     })

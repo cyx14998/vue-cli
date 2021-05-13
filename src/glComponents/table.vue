@@ -4,7 +4,7 @@
     <div class="action-btns marginb-10">
       <div>
         <el-button type="primary" size="small" @click="editNode(1,{})">新增框架</el-button>
-        <el-button type="primary" size="small" @click="openIndexFrameModal()">关联模板</el-button>
+        <el-button type="primary" size="small" @click="openRoute()">关联模板</el-button>
       </div>
     </div>
     <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark" v-loading="loading"
@@ -12,12 +12,12 @@
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column label="框架ID">
+      <el-table-column label="框架ID" width="200">
         <template slot-scope="scope">{{ scope.row.id }}</template>
       </el-table-column>
-      <el-table-column prop="title" label="框架中文名称" show-overflow-tooltip>
+      <el-table-column prop="title" label="框架中文名称">
       </el-table-column>
-      <el-table-column prop="enName" label="框架英文名称" show-overflow-tooltip>
+      <el-table-column prop="enName" label="框架英文名称">
       </el-table-column>
       <el-table-column prop="path" label="框架路径">
       </el-table-column>
@@ -57,7 +57,7 @@
         </el-pagination>
       </el-col>
     </div>
-    <Route v-if="routePageVisible" :visible="routePageVisible" @close="routePageClose" />
+    <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" :routeData="routeData" />
     <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
       :frameData="frameData" />
   </div>
@@ -84,7 +84,8 @@ export default {
         pageSize: 10,
         total: 0,
       },
-      routePageVisible: false, // 指标||范围 drawer
+      routeVisible: false, // 指标 drawer
+      routeData: null,
       frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
       loading: false,
@@ -133,10 +134,12 @@ export default {
             total,
           }
         }
-      });
+      }).catch(() => {
+        this.loading = false
+      })
     },
-    routePageClose () {
-      this.routePageVisible = false
+    routeClose () {
+      this.routeVisible = false
     },
     frameDialogClose () {
       this.frameDialogVisible = false
@@ -151,42 +154,75 @@ export default {
       this.frameDialogVisible = true
     },
     // 打开指标页面
-    openIndexFrameModal (data) {
-      console.log(data)
-      this.routePageVisible = true
+    openRoute () {
+      this.routeData = {
+        id: this.nodeId
+      }
+      this.routeVisible = true
     },
     // 停用1||启用2||删除3
     changeNodeStatus (flag, node) {
       this.loading = true
-      // console.log(flag, node)
-      let ids = [node.id]
-      if (flag === 3) {
-        this.$http({
-          url: '/api/databrowser/glTemplate/batchDeleteFramework',
-          method: 'post',
-          params: JSON.stringify(ids)
-        }).then((res) => {
-          this.loading = false
-          if (res && res.success) {
-            this.$message.success(res.message);
+      const { id, title, enName, sortNo } = node
+      let url = ''
+      let params = null
+      let ids = [id]
+      // 停用
+      if (flag === 1) {
+        url = '/api/databrowser/glTemplate/updateFramework'
+        params = {
+          id,
+          title,
+          enName,
+          sortNo,
+          parentId: this.nodeId,
+          status: false,
+          sectionType: 1
+        }
+        // 启用
+      } else if (flag === 2) {
+        url = '/api/databrowser/glTemplate/updateFramework'
+        params = {
+          id,
+          title,
+          enName,
+          sortNo,
+          parentId: this.nodeId,
+          status: true,
+          sectionType: 1
+        }
+        // 删除
+      } else if (flag === 3) {
+        url = '/api/databrowser/glTemplate/batchDeleteFramework'
+        params = JSON.stringify(ids)
+      }
+      this.$http({
+        url,
+        method: 'post',
+        params
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          this.$message.success(res.message);
+          // 删除
+          if (flag === 3) {
             this.$parent.$refs.nodeTree.dealDelNode([node])
-            this.$nextTick(() => {
-              this.getData()
-            })
           } else {
-            this.$message({
-              type: 'error',
-              message: res.message
-            });
+            // 切换状态（启用||停用）
+            this.$parent.$refs.nodeTree.dealEditNode(res.data)
           }
-        }).catch((err) => {
-          this.loading = false
+          this.$nextTick(() => {
+            this.getData()
+          })
+        } else {
           this.$message({
             type: 'error',
-            message: err
+            message: res.message
           });
-        });
-      }
+        }
+      }).catch(() => {
+        this.loading = false
+      })
     },
     // 每页显示多少 change
     handleSizeChange (val) {
@@ -203,15 +239,6 @@ export default {
         pageNo: val
       }
       this.getData()
-    },
-    toggleSelection (rows) {
-      if (rows) {
-        rows.forEach(row => {
-          this.$refs.multipleTable.toggleRowSelection(row);
-        });
-      } else {
-        this.$refs.multipleTable.clearSelection();
-      }
     },
     handleSelectionChange (val) {
       this.multipleSelection = val;
@@ -252,13 +279,7 @@ export default {
                   message: res.message
                 });
               }
-            }).catch((err) => {
-              this.loading = false
-              this.$message({
-                type: 'error',
-                message: err
-              });
-            });
+            })
           }
         }
       });

@@ -4,6 +4,10 @@
     <div class="treeContainer">
       <el-tree :data="data" ref="tree" node-key="id" :load="loadNode" lazy :expand-on-click-node="false"
         :props="defaultProps" @node-click="nodeClick" highlight-current>
+        <span slot-scope="{ data }">
+          <span>{{ data.title }}</span>
+          <span v-if="!data.status" class="stop">（停）</span>
+        </span>
       </el-tree>
     </div>
   </div>
@@ -54,8 +58,13 @@ export default {
         if (res && res.success) {
           this.data = res.data
         }
-      });
-
+      }).catch((err) => {
+        this.loading = false
+        this.$message({
+          type: 'error',
+          message: err
+        })
+      })
     },
     // append方法在lazy模式下不起作用，只能用这种方式
     loadNode (node, resolve) {
@@ -75,27 +84,38 @@ export default {
         if (res && res.success) {
           return resolve(res.data);
         }
-      });
+      }).catch(() => {
+        this.loading = false
+      })
     },
     nodeClick (nodeObj, node) {
+      this.$store.dispatch('setRoute', this.dealRoute(node, []))
       this.node = node
       this.$store.dispatch('setNodeId', nodeObj.id)
+    },
+    dealRoute (node, route) {
+      if (node.parent && node.parent != null) {
+        route.unshift(node.label)
+        this.dealRoute(node.parent, route)
+      }
+      return route.join("|")
     },
     // 新增框架后 处理tree（append方法在lazy模式下不起作用，只能用这种方式）
     dealAddNode (nodeObj) {
       let node = this.node
       if (node) {
-        let children = [];
-        children.push(nodeObj);
-        node.childNodes.forEach(d => children.push(d.data));
-        node.resolve && node.resolve(children);
+        this.loadNode(node, node.resolve) // 调用接口方式更新tree 可以直接排序
+        // let children = [];
+        // children.push(nodeObj);
+        // node.childNodes.forEach(d => children.push(d.data));
+        // node.resolve && node.resolve(children); // 不调用接口更新tree 但是没法排序
       } else {
         this.getAllNodesById()
       }
     },
     // 编辑框架
     dealEditNode (nodeObj) {
-      this.$refs.tree.remove(nodeObj)
+      // this.$refs.tree.remove(nodeObj)
       this.dealAddNode(nodeObj)
     },
     // 批量删除后 处理tree
@@ -113,6 +133,9 @@ export default {
 <style scope lang="less">
 .tree {
   margin-top: 15px;
+  .stop {
+    color: red;
+  }
   .treeContainer {
     height: 100%;
     min-width: 200px;
