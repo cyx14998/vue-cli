@@ -27,6 +27,7 @@ export default {
         label: "title",
         value: 'id'
       },
+      node: undefined,
     };
   },
   computed: {
@@ -38,8 +39,9 @@ export default {
     }
   },
   watch: {
-    // 监听浏览器类型改变
+    // 监听浏览器类型改变 清空数据
     browsersType () {
+      this.node = undefined
       this.getAllNodesById()
       this.$emit('getTableData')
     },
