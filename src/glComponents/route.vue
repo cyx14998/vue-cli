@@ -15,9 +15,9 @@
         <el-table :data="tableData" ref="zb_table" size="small" border class="zb-modal-table" :height="zb_tableHeight"
           v-loading="loading" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
-          <el-table-column property="title" label="模板名称" width="300"></el-table-column>
-          <el-table-column property="sortNo" label="排序"></el-table-column>
-          <el-table-column label="操作">
+          <el-table-column property="title" label="模板名称" align="center"></el-table-column>
+          <el-table-column property="sortNo" label="框架内顺序" align="center"></el-table-column>
+          <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
               <el-popconfirm class="marginl10 displayi-b" title="是否删除?" v-if="scope.row.nodeStatus != 1"

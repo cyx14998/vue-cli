@@ -12,24 +12,16 @@
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column label="框架ID" width="200">
-        <template slot-scope="scope">{{ scope.row.id }}</template>
+      <el-table-column prop="path" label="框架路径" align="center">
       </el-table-column>
-      <el-table-column prop="title" label="框架中文名称">
+      <el-table-column prop="level" label="层级" width="160" align="center">
       </el-table-column>
-      <el-table-column prop="enName" label="框架英文名称">
-      </el-table-column>
-      <el-table-column prop="path" label="框架路径">
-      </el-table-column>
-      <el-table-column prop="isLeaf" label="是否叶子节点" width="106">
-        <template slot-scope="scope">{{ scope.row.isLeaf ? '是' : '否' }}</template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="50">
+      <el-table-column prop="status" label="状态" width="100" align="center">
         <template slot-scope="scope">{{ scope.row.status ? '启用' : '停用' }}</template>
       </el-table-column>
-      <el-table-column prop="sortNo" label="排序" width="50">
+      <el-table-column prop="sortNo" label="排序" width="50" align="center">
       </el-table-column>
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
           <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.status"
