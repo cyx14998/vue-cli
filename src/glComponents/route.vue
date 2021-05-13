@@ -64,7 +64,7 @@ export default {
       multipleSelection: [], // 多选
       pageParams: { // 分页参数obj
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 100,
         total: 0,
       },
       zb_tableHeight: 0,
@@ -81,6 +81,9 @@ export default {
     },
     route () {
       return this.$store.getters.getRoute
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
     },
   },
   mounted () {
@@ -108,7 +111,7 @@ export default {
         url: '/api/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
         method: 'get',
         params: {
-          sectionType: 1,
+          sectionType: this.browsersType,
           id: this.nodeId,
           pageNo,
           pageSize,

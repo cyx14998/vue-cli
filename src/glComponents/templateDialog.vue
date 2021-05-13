@@ -52,6 +52,9 @@ export default {
   computed: {
     nodeId () {
       return this.$store.getters.getNodeId
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
     }
   },
   watch: {
@@ -95,7 +98,7 @@ export default {
           let formData = new FormData();
           formData.append('title', title);
           formData.append('sortNo', sortNo);
-          formData.append('sectionType', 1);
+          formData.append('sectionType', this.browsersType);
           formData.append('parentId', this.nodeId);
           let config = {
             headers: {

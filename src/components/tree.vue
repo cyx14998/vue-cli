@@ -83,7 +83,7 @@ export default {
         url: '/api/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
-          sectionType: 1,
+          sectionType: this.browsersType,
           id: -1,
         }
       }).then((res) => {

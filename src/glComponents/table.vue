@@ -73,7 +73,7 @@ export default {
       multipleSelection: [], // 多选
       pageParams: { // 分页参数obj
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 100,
         total: 0,
       },
       routeVisible: false, // 指标 drawer
@@ -93,14 +93,20 @@ export default {
     nodeId () {
       return this.$store.getters.getNodeId
     },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
+    },
   },
   watch: {
     nodeId () {
       this.getData()
-    }
+    },
+    // browsersType () {
+    //   this.getData()
+    // },
   },
   mounted () {
-    this.getData()
+    // this.getData()
   },
   methods: {
     getData () {
@@ -111,7 +117,7 @@ export default {
         url: '/api/databrowser/glTemplate/loadFrameworkByPage',
         method: 'get',
         params: {
-          sectionType: 1,
+          sectionType: this.browsersType,
           id: this.nodeId,
           pageNo,
           pageSize,
@@ -169,7 +175,7 @@ export default {
           sortNo,
           parentId: this.nodeId,
           status: false,
-          sectionType: 1
+          sectionType: this.browsersType,
         }
         // 启用
       } else if (flag === 2) {
@@ -181,7 +187,7 @@ export default {
           sortNo,
           parentId: this.nodeId,
           status: true,
-          sectionType: 1
+          sectionType: this.browsersType,
         }
         // 删除
       } else if (flag === 3) {

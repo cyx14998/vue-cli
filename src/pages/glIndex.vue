@@ -2,7 +2,7 @@
   <div id="el-main">
     <diV id="left">
       <el-select v-model="value" placeholder="请选择" @change="onChange">
-        <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.name">
+        <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
         </el-option>
       </el-select>
       <Tree ref="nodeTree" @getTableData="getTableData" />
@@ -60,11 +60,12 @@ export default {
         if (res && res.success) {
           this.options = res.data
           if (res.data && res.data.length) {
-            this.value = res.data[0].name
+            this.value = res.data[0].id
+            this.$store.dispatch('setBrowsersType', res.data[0].id)
             this.$store.dispatch('setRoute', res.data[0].name)
-            this.$nextTick(() => {
-              this.$refs.nodeTree.getAllNodesById()
-            })
+            // this.$nextTick(() => {
+            //   this.$refs.nodeTree.getAllNodesById()
+            // })
           }
         } else {
           this.$message.error(res.message || '获取下拉框板块出错!')
@@ -72,8 +73,8 @@ export default {
       });
     },
     onChange (val) {
+      this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
-      this.$store.dispatch('setActiveName', 'indexFrame')
     },
     getTableData () {
       this.$refs.tablePage.getData()

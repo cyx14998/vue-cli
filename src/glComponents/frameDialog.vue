@@ -52,6 +52,9 @@ export default {
   computed: {
     nodeId () {
       return this.$store.getters.getNodeId
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
     }
   },
   mounted () {
@@ -69,7 +72,7 @@ export default {
             title,
             enName,
             sortNo,
-            sectionType: 1,
+            sectionType: this.browsersType,
             parentId: this.nodeId,
             status: false
           }
