@@ -14,6 +14,7 @@ module.exports = {
     },
 
     outputDir: 'dist',
+    publicPath: './',
     lintOnSave: false,
 
     devServer: {
@@ -22,6 +23,7 @@ module.exports = {
             errors: false
         },
         port: '8081',
+        hot: true,
         proxy: {
             "/graphs_api": {
                 target: "https://crmdc.mysteelcms.com/", //生产

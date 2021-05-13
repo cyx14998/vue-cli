@@ -8,9 +8,7 @@
       <Tree ref="nodeTree" @getTableData="getTableData" />
     </diV>
     <div id="right">
-      <div v-if="showTable">
-        <Table ref="tablePage" :tableHeight="tableHeight" />
-      </div>
+      <Table v-if="showTable" ref="tablePage" :tableHeight="tableHeight" />
     </div>
   </div>
 </template>
@@ -63,9 +61,6 @@ export default {
             this.value = res.data[0].id
             this.$store.dispatch('setBrowsersType', res.data[0].id)
             this.$store.dispatch('setRoute', res.data[0].name)
-            // this.$nextTick(() => {
-            //   this.$refs.nodeTree.getAllNodesById()
-            // })
           }
         } else {
           this.$message.error(res.message || '获取下拉框板块出错!')
@@ -75,6 +70,13 @@ export default {
     onChange (val) {
       this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
+      let route = ''
+      this.options.map(item=>{
+        if(item.id === val){
+          route = item.name
+        }
+      })
+      this.$store.dispatch('setRoute', route)
     },
     getTableData () {
       this.$refs.tablePage.getData()

@@ -2,11 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex);
 const state = {
-    browsersType: '', // 浏览器类型
+    browsersType: null, // 浏览器类型
     activeName: 'indexFrame', // 框架名称
     filterParams: {
         name: '',
-        status: '0'
+        status: ''
     },  // 查询筛选 params
     nodeId: -1,
     route: '', // 框架路径
