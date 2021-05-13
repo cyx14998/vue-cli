@@ -4,7 +4,7 @@
     <el-drawer :visible.sync="visible" :with-header="false" size="100%">
       <div class="zb-modal-header">
         <div class="zb-modal-header__title">
-          <h3 class="zb-modal-header__text"><span>框架路径：{{route}}</span></h3>
+          <h3 class="zb-modal-header__text"><span>关联模板  框架路径：{{route}}</span></h3>
         </div>
         <div class="zb-modal-header__append">
           <el-button size="small" @click="closeModal">返回</el-button>
