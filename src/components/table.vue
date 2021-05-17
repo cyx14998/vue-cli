@@ -63,7 +63,7 @@
         </el-pagination>
       </el-col>
     </div>
-    <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" />
+    <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" :routeData="routeData"/>
     <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
       :frameData="frameData" />
     <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".fdbt" ref="exportBtn"
@@ -101,6 +101,7 @@ export default {
         total: 0,
       },
       routeVisible: false, // 指标||范围 drawer
+      routeData: {}, // 
       frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
       loading: false,
@@ -217,7 +218,9 @@ export default {
     },
     // 打开指标||范围页面
     openRoute (data) {
-      console.log(data)
+      this.routeData = {
+        ...data
+      }
       this.routeVisible = true
     },
     // 停用1||启用2

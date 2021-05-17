@@ -4,16 +4,16 @@
     <el-drawer :visible.sync="visible" :with-header="false" size="100%">
       <div class="zb-modal-header">
         <div class="zb-modal-header__title">
-          <h3 class="zb-modal-header__text"><span>框架路径：宏观</span></h3>
+          <h3 class="zb-modal-header__text"><span>框架路径：{{routeData.route}}</span></h3>
         </div>
         <div class="zb-modal-header__append">
           <el-button size="small" @click="closeModal">返回框架配置</el-button>
         </div>
       </div>
       <div class="zb-modal-add">
-        <el-button v-if="activeName === 'indexFrame'" type="primary" size="small" @click="indicatorModal(1)">新增指标
+        <el-button v-if="activeName === 'indexFrame'" type="primary" size="small" @click="indicatorModal(1,{})">新增指标
         </el-button>
-        <el-button v-else type="primary" size="small" @click="rangeModal(1)">新增范围</el-button>
+        <el-button v-else type="primary" size="small" @click="rangeModal(1,{})">新增范围</el-button>
       </div>
       <div class="padding20">
         <el-table v-if="activeName === 'indexFrame'" :data="tableData" ref="zb_table" size="small" border
@@ -88,7 +88,8 @@ import RangeDialog from './rangeDialog'
 export default {
   name: "Route",
   props: {
-    visible: Boolean
+    visible: Boolean,
+    routeData: Object
   },
   components: {
     IndicatorDialog,

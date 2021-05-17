@@ -3,9 +3,9 @@
   <div class="modal frame-modal">
     <el-dialog :title="indicatorData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
       :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
-      <el-form :model="indicatorData" ref="frameForm" :rules="rules">
-        <el-form-item label="指标" label-width="120px" prop="indicator">
-          <el-input v-model="indicatorData.name" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input>
+      <el-form :model="indicatorData" ref="indicatorForm" :rules="rules">
+        <el-form-item label="指标" label-width="120px" prop="title">
+          <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortNo">
           <el-input-number size="small" v-model="indicatorData.sortNo" controls-position="right" :min="1">
@@ -32,7 +32,7 @@ export default {
   data () {
     return {
       rules: {
-        indicator: [
+        title: [
           { required: true, message: '请输入指标ID/指标名称', trigger: 'blur' }
         ]
       },
@@ -52,11 +52,11 @@ export default {
 
   },
   mounted () {
-    console.log(this.indicatorData)
   },
   methods: {
     submitForm () {
-      this.$refs.frameForm.validate((valid) => {
+      let self = this
+      this.$refs.indicatorForm.validate((valid) => {
         if (valid) {
           self.close();
           this.$parent.$parent.changeLoading(true)
