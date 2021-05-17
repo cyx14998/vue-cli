@@ -1,6 +1,7 @@
-# hello-world
+# 框架目录管理+钢联模板后台管理
 ```
-vue-cli+vue-router+elementUI+axios简易版本
+框架目录管理+钢联模板后台管理
+vue-cli+vue-router+elementUI+axios
 ```
 
 ## Project setup
@@ -22,6 +23,3 @@ npm run build
 ```
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
