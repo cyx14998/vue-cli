@@ -4,13 +4,13 @@
     <div class="action-btns marginb-10">
       <div class="btn-flex">
         <el-button size="small">框架模板下载</el-button>
-        <el-button type="primary" size="small">框架导入</el-button>
+        <el-button type="primary" size="small" @click="importTemplate">框架导入</el-button>
       </div>
       <div>
         <el-button type="primary" size="small" @click="editNode(1,{})">新增框架</el-button>
       </div>
     </div>
-    <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark"
+    <el-table border size="small" ref="multipleTable" :data="tableData" tooltip-effect="dark" v-loading="loading"
       :style="{width: '100%', height: tableHeight + 'px'}" :height="tableHeight"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55">
@@ -30,20 +30,20 @@
       <el-table-column prop="status" label="状态" width="50">
         <template slot-scope="scope">{{ scope.row.status === 1 ? '启用' : '停用' }}</template>
       </el-table-column>
-      <el-table-column prop="sort" label="排序" width="50">
+      <el-table-column prop="sortNo" label="排序" width="50">
       </el-table-column>
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'"
-            @click="openIndexFrameModal(scope.row)">指标
+          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标
           </el-button>
-          <el-button type="text" v-else @click="openIndexFrameModal(scope.row)">范围</el-button>
+          <el-button type="text" v-else @click="openRoute(scope.row)">范围</el-button>
           <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
-            :confirm="changeNodeStatus(scope.row)">
+            @confirm="()=>{changeNodeStatus(1,scope.row)}">
             <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
-          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
+            @confirm="()=>{changeNodeStatus(2,scope.row)}">
             <el-button type="text" slot="reference">启用</el-button>
           </el-popconfirm>
           <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
@@ -57,15 +57,17 @@
         <el-button type="primary" size="small" :disabled="!multipleSelection.length" @click="mulDel">批量删除</el-button>
       </el-col>
       <el-col :span="16" class="align-right">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
-          :page-sizes="[10, 20, 50, 100]" :page-size="100" layout="total, sizes, prev, pager, next, jumper"
-          :total="400">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+          :current-page="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
+          layout="total, sizes, prev, pager, next, jumper" :total="pageParams.total">
         </el-pagination>
       </el-col>
     </div>
     <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" />
     <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
       :frameData="frameData" />
+    <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".fdbt" ref="exportBtn"
+      @change="importFileChange" />
   </div>
 </template>
 
@@ -85,18 +87,23 @@ export default {
     return {
       tableData: [{
         id: 110100000000,
-        cnName: '基本资料',
+        title: '基本资料',
         enName: 'base data',
         route: '指标框架|第二层',
         isLeaf: 1,
         status: 1,
-        sort: 1
+        sortNo: 1
       }],
       multipleSelection: [],
-      page: 1,
+      pageParams: { // 分页参数obj
+        pageNo: 1,
+        pageSize: 100,
+        total: 0,
+      },
       routeVisible: false, // 指标||范围 drawer
       frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
+      loading: false,
     };
   },
   created () {
@@ -108,22 +115,89 @@ export default {
     },
   },
   watch: {
+    nodeId () {
+      this.getData()
+    },
   },
   mounted () {
-    this.getData()
+    // this.getData()
   },
   methods: {
     getData () {
       this.multipleSelection = []
       const filterParams = this.$store.getters.getFilterParams
       console.log(filterParams)
-      let data = []
-      for (let i = 0; i < 400; i++) {
-        let d = Object.assign({}, this.tableData[0])
-        d.id = i
-        data.push(d)
+      this.multipleSelection = []
+      const { pageNo, pageSize } = this.pageParams
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadFrameworkByPage',
+        method: 'get',
+        params: {
+          sectionType: this.browsersType,
+          id: this.nodeId,
+          pageNo,
+          pageSize,
+        }
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          const { total, records } = res.data
+          this.tableData = records
+          this.pageParams = {
+            ...this.pageParams,
+            total,
+          }
+        }
+      }).catch(() => {
+        this.loading = false
+      })
+    },
+    // 导入框架
+    importTemplate () {
+      let btn = this.$refs.exportBtn;
+      btn.value = "";
+      btn.click();
+    },
+    importFileChange (e) {
+      let self = this
+      try {
+        this.changeLoading(true)
+
+        let url = '/api/databrowser/glTemplate/addGlTemplate'
+        let formData = new FormData();
+        formData.append('templateFile', e.target.files[0]);
+        let config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+        this.$axios.post(url, formData, config).then(function (res) {
+          self.changeLoading(false)
+          if (res.data && res.data.success) {
+            self.$message({
+              type: 'success',
+              message: res.data.message
+            })
+            self.$nextTick(() => {
+              self.getData()
+            })
+          } else {
+            self.$message({
+              type: 'error',
+              message: res.data.message
+            })
+          }
+        }).catch((res) => {
+          self.$message({
+            type: 'error',
+            message: res
+          })
+          self.changeLoading(false)
+        })
+      } catch (e) {
+        console.error(e)
       }
-      this.tableData = data
     },
     routeClose () {
       this.routeVisible = false
@@ -136,30 +210,91 @@ export default {
         ...data,
         isLeaf: flag === 2 ? '' + data.isLeaf : '',
         flag,
-        sort: flag === 2 ? '' + data.sort : 1,
-        title: flag === 1 ? '新增框架' : '编辑框架'
+        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        headTitle: flag === 1 ? '新增框架' : '编辑框架'
       }
       this.frameDialogVisible = true
     },
-    // 打开指标页面
-    openIndexFrameModal (data) {
+    // 打开指标||范围页面
+    openRoute (data) {
       console.log(data)
       this.routeVisible = true
     },
-    handleSizeChange () { },
-    changeNodeStatus () { },
-    handleCurrentChange () { },
-    toggleSelection (rows) {
-      if (rows) {
-        rows.forEach(row => {
-          this.$refs.multipleTable.toggleRowSelection(row);
-        });
-      } else {
-        this.$refs.multipleTable.clearSelection();
+    // 停用1||启用2
+    changeNodeStatus (flag, node) {
+      this.loading = true
+      const { id, title, enName, sortNo } = node
+      let url = ''
+      let params = null
+      // 停用
+      if (flag === 1) {
+        url = '/api/databrowser/glTemplate/updateFramework'
+        params = {
+          id,
+          title,
+          enName,
+          sortNo,
+          parentId: this.nodeId,
+          status: false,
+          sectionType: this.browsersType,
+        }
+        // 启用
+      } else if (flag === 2) {
+        url = '/api/databrowser/glTemplate/updateFramework'
+        params = {
+          id,
+          title,
+          enName,
+          sortNo,
+          parentId: this.nodeId,
+          status: true,
+          sectionType: this.browsersType,
+        }
       }
+      this.$http({
+        url,
+        method: 'post',
+        params
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          this.$message.success(res.message);
+          // 切换状态（启用||停用）
+          this.$parent.$refs.nodeTree.dealEditNode(res.data)
+          this.$nextTick(() => {
+            this.getData()
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          });
+        }
+      }).catch(() => {
+        this.loading = false
+      })
+    },
+    // 每页显示多少 change
+    handleSizeChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageSize: val
+      }
+      this.getData()
+    },
+    // 页码change
+    handleCurrentChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageNo: val
+      }
+      this.getData()
     },
     handleSelectionChange (val) {
       this.multipleSelection = val;
+    },
+    changeLoading (flag) {
+      this.loading = flag
     },
     mulDel () {
       this.$alert('是否删除?', '删除', {
@@ -167,10 +302,35 @@ export default {
         confirmButtonText: '确定',
         // cancelButtonText: '取消',
         callback: action => {
-          this.$message({
-            type: 'info',
-            message: `action: ${action}`
-          });
+          this.loading = true
+          let ids = []
+          this.multipleSelection.map(item => {
+            ids.push(item.id)
+          })
+          if (action === 'confirm') {
+            this.$http({
+              url: '/api/databrowser/glTemplate/batchDeleteFramework',
+              method: 'post',
+              params: JSON.stringify(ids)
+            }).then((res) => {
+              this.loading = false
+              if (res && res.success) {
+                this.$message({
+                  type: 'success',
+                  message: res.message
+                });
+                this.$parent.$refs.nodeTree.dealDelNode(this.multipleSelection)
+                this.$nextTick(() => {
+                  this.getData()
+                })
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.message
+                });
+              }
+            })
+          }
         }
       });
     }

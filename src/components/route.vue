@@ -17,29 +17,27 @@
       </div>
       <div class="padding20">
         <el-table v-if="activeName === 'indexFrame'" :data="tableData" ref="zb_table" size="small" border
-          class="zb-modal-table" :height="zb_tableHeight" @selection-change="handleSelectionChange">
+          v-loading="loading" class="zb-modal-table" :height="zb_tableHeight" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column property="id" label="指标ID" width="150"></el-table-column>
           <el-table-column property="name" label="指标名称" width="300"></el-table-column>
           <el-table-column property="status" label="状态"></el-table-column>
-          <el-table-column property="sort" label="排序"></el-table-column>
+          <el-table-column property="sortNo" label="排序"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
               <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
-                :confirm="changeNodeStatus(scope.row)">
+                @confirm="()=>{changeNodeStatus(scope.row)}">
                 <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
               </el-popconfirm>
-              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
+                @confirm="()=>{changeNodeStatus(scope.row)}">
                 <el-button type="text" slot="reference">启用</el-button>
               </el-popconfirm>
-              <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
-                @click="changeNodeStatus(scope.row)">停用</el-button>
-              <el-button type="text" v-else @click="changeNodeStatus(scope.row)">启用</el-button> -->
             </template>
           </el-table-column>
         </el-table>
-        <el-table v-else :data="tableData" ref="zb_table" size="small" border class="zb-modal-table"
+        <el-table v-else :data="tableData" ref="zb_table" size="small" border class="zb-modal-table" v-loading="loading"
           :height="zb_tableHeight" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column property="name" label="范围名称" width="300"></el-table-column>
@@ -51,15 +49,13 @@
             <template slot-scope="scope">
               <el-button type="text" @click="rangeModal(2,scope.row)">编辑</el-button>
               <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus === 1"
-                :confirm="changeNodeStatus(scope.row)">
+                @confirm="()=>{changeNodeStatus(scope.row)}">
                 <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
               </el-popconfirm>
-              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else :confirm="changeNodeStatus(scope.row)">
+              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
+                @confirm="()=>{changeNodeStatus(scope.row)}">
                 <el-button type="text" slot="reference">启用</el-button>
               </el-popconfirm>
-              <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
-                @click="changeNodeStatus(scope.row)">停用</el-button>
-              <el-button type="text" v-else @click="changeNodeStatus(scope.row)">启用</el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -69,9 +65,9 @@
             </el-button>
           </el-col>
           <el-col :span="16" class="align-right">
-            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
-              :page-sizes="[10, 20, 50, 100]" :page-size="100" layout="total, sizes, prev, pager, next, jumper"
-              :total="400">
+            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+              :current-page="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
+              layout="total, sizes, prev, pager, next, jumper" :total="pageParams.total">
             </el-pagination>
           </el-col>
         </div>
@@ -79,7 +75,8 @@
       <IndicatorDialog v-if="indicatorDialogVisible" :visible="indicatorDialogVisible" @close="indicatorDialogClose"
         :indicatorData="indicatorData">
       </IndicatorDialog>
-      <RangeDialog v-if="rangeDialogVisible" :visible="rangeDialogVisible" @close="rangeDialogClose" :rangeData="rangeData">
+      <RangeDialog v-if="rangeDialogVisible" :visible="rangeDialogVisible" @close="rangeDialogClose"
+        :rangeData="rangeData">
       </RangeDialog>
     </el-drawer>
   </div>
@@ -89,7 +86,7 @@
 import IndicatorDialog from './indicatorDialog'
 import RangeDialog from './rangeDialog'
 export default {
-  name: "RoutePage",
+  name: "Route",
   props: {
     visible: Boolean
   },
@@ -105,15 +102,20 @@ export default {
         route: '指标框架|第二层',
         isLeaf: false,
         status: 1,
-        sort: 1
+        sortNo: 1
       }],
       multipleSelection: [],
-      page: 1,
+      pageParams: { // 分页参数obj
+        pageNo: 1,
+        pageSize: 100,
+        total: 0,
+      },
       zb_tableHeight: 0,
       rangeDialogVisible: false, // 范围弹窗visible
       rangeData: {}, // 范围弹窗数据
       indicatorDialogVisible: false, // 指标弹窗visible
       indicatorData: {}, // 指标弹窗数据
+      loading: false,
     };
   },
   created () {
@@ -121,7 +123,16 @@ export default {
   computed: {
     activeName () {
       return this.$store.getters.getActiveName
-    }
+    },
+    nodeId () {
+      return this.$store.getters.getNodeId
+    },
+    route () {
+      return this.$store.getters.getRoute
+    },
+    browsersType () {
+      return this.$store.getters.getBrowsersType
+    },
   },
   watch: {
 
@@ -144,13 +155,31 @@ export default {
   },
   methods: {
     getData () {
-      let data = []
-      for (let i = 0; i < 40; i++) {
-        let d = Object.assign({}, this.tableData[0])
-        d.id = i
-        data.push(d)
-      }
-      this.tableData = data
+      this.multipleSelection = []
+      const { pageNo, pageSize } = this.pageParams
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
+        method: 'get',
+        params: {
+          sectionType: this.browsersType,
+          id: this.nodeId,
+          pageNo,
+          pageSize,
+        }
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          const { total, records } = res.data
+          this.tableData = records
+          this.pageParams = {
+            ...this.pageParams,
+            total,
+          }
+        }
+      }).catch(() => {
+        this.loading = false
+      })
     },
     closeModal () {
       this.$emit('close')
@@ -160,7 +189,8 @@ export default {
       this.rangeData = {
         ...data,
         flag,
-        title: flag === 1 ? '新增范围' : '编辑范围'
+        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        headTitle: flag === 1 ? '新增范围' : '编辑范围'
       }
       this.rangeDialogVisible = true
     },
@@ -172,7 +202,8 @@ export default {
       this.indicatorData = {
         ...data,
         flag,
-        title: flag === 1 ? '新增指标' : '编辑指标'
+        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        headTitle: flag === 1 ? '新增指标' : '编辑指标'
       }
       this.indicatorDialogVisible = true
     },
@@ -180,13 +211,51 @@ export default {
       this.indicatorDialogVisible = false
     },
 
-    changeNodeStatus () {
-
+    changeNodeStatus (node) {
+      this.loading = true
+      this.$http({
+        url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+        method: 'post',
+        params: JSON.stringify([node.id])
+      }).then((res) => {
+        this.loading = false
+        if (res && res.success) {
+          this.$message({
+            type: 'success',
+            message: res.message
+          });
+          this.getData()
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          });
+        }
+      }).catch(() => {
+        this.loading = false
+      })
     },
-    handleSizeChange () { },
-    handleCurrentChange () { },
+    // 每页显示多少 change
+    handleSizeChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageSize: val
+      }
+      this.getData()
+    },
+    // 页码change
+    handleCurrentChange (val) {
+      this.pageParams = {
+        ...this.pageParams,
+        pageNo: val
+      }
+      this.getData()
+    },
     handleSelectionChange (val) {
       this.multipleSelection = val;
+    },
+    changeLoading (flag) {
+      this.loading = flag
     },
     mulDel () {
       this.$alert('是否删除?', '删除', {
@@ -194,10 +263,34 @@ export default {
         confirmButtonText: '确定',
         // cancelButtonText: '取消',
         callback: action => {
-          this.$message({
-            type: 'info',
-            message: `action: ${action}`
-          });
+          this.loading = true
+          let ids = []
+          this.multipleSelection.map(item => {
+            ids.push(item.id)
+          })
+          if (action === 'confirm') {
+            this.$http({
+              url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+              method: 'post',
+              params: JSON.stringify(ids)
+            }).then((res) => {
+              this.loading = false
+              if (res && res.success) {
+                this.$message({
+                  type: 'success',
+                  message: res.message
+                });
+                this.getData()
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.message
+                });
+              }
+            }).catch(() => {
+              this.loading = false
+            })
+          }
         }
       });
     }

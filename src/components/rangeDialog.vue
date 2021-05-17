@@ -1,7 +1,7 @@
 // 新增||编辑 范围
 <template>
   <div class="modal frame-modal">
-    <el-dialog :title="rangeData.title" :visible.sync="visible" width="500px" :show-close="false"
+    <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
       :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
       <el-form :model="rangeData" ref="frameForm" :rules="rules">
         <el-form-item label="范围" label-width="130px" prop="range" class="treeOuter">

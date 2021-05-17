@@ -20,7 +20,6 @@ export default {
   },
   data () {
     return {
-      id: 1,
       data: [],
       defaultProps: {
         children: "children",

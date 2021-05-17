@@ -70,9 +70,6 @@ export default {
     // console.log(this.templateData)
   },
   methods: {
-    handleRemove (file, fileList) {
-      console.log(file, fileList);
-    },
     handleChange () {
       let btn = this.$refs.exportBtn;
       btn.value = "";

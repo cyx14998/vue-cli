@@ -22,7 +22,7 @@ module.exports = {
             warning: false,
             errors: false
         },
-        port: '8081',
+        port: '8181',
         hot: true,
         proxy: {
             "/graphs_api": {

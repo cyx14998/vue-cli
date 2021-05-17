@@ -25,7 +25,7 @@
 
 <script>
 export default {
-  name: "IndexModal",
+  name: "FrameDialog",
   props: {
     visible: Boolean,
     frameData: Object

@@ -47,24 +47,40 @@ export default {
   data () {
     return {
       showTable: false,
-      options: [{
-        value: '1',
-        label: '期货数据浏览器'
-      }, {
-        value: '2',
-        label: '行情数据浏览器'
-      }, {
-        value: '3',
-        label: '宏观数据浏览器'
-      }],
-      value: '1',
+      options: [],
+      value: '',
       tableHeight: 0,
     };
   },
   methods: {
+    getSelectData () {
+      this.$http({
+        url: '/api/databrowser/glTemplate/loadSectionSelectList',
+        method: 'get',
+      }).then((res) => {
+        if (res && res.success) {
+          this.options = res.data
+          if (res.data && res.data.length) {
+            this.value = res.data[0].id
+            this.$store.dispatch('setBrowsersType', res.data[0].id)
+            this.$store.dispatch('setRoute', res.data[0].name)
+          }
+        } else {
+          this.$message.error(res.message || '获取下拉框板块出错!')
+        }
+      });
+    },
     onChange (val) {
+      this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
       this.$store.dispatch('setActiveName', 'indexFrame')
+      let route = ''
+      this.options.map(item=>{
+        if(item.id === val){
+          route = item.name
+        }
+      })
+      this.$store.dispatch('setRoute', route)
     },
     getTableData () {
       this.$refs.tablePage.getData()
