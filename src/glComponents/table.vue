@@ -245,17 +245,17 @@ export default {
       this.loading = flag
     },
     mulDel () {
-      this.$alert('是否删除?', '删除', {
+      this.$alert('是否确认删除选中框架?', '删除', {
         // showCancelButton: true,
         confirmButtonText: '确定',
         // cancelButtonText: '取消',
         callback: action => {
-          this.loading = true
-          let ids = []
-          this.multipleSelection.map(item => {
-            ids.push(item.id)
-          })
           if (action === 'confirm') {
+            this.loading = true
+            let ids = []
+            this.multipleSelection.map(item => {
+              ids.push(item.id)
+            })
             this.$http({
               url: '/api/databrowser/glTemplate/batchDeleteFramework',
               method: 'post',

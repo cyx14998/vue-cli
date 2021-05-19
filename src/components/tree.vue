@@ -179,7 +179,6 @@ export default {
     }
   },
   created () {
-    this.getAllNodesById();
   }
 };
 </script>

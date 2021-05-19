@@ -29,6 +29,7 @@ export default {
   created () {
   },
   mounted () {
+    this.getSelectData()
     this.showTable = true
     this.$nextTick(() => {
       let bH = document.body.offsetHeight;
@@ -68,15 +69,15 @@ export default {
         } else {
           this.$message.error(res.message || '获取下拉框板块出错!')
         }
-      });
+      })
     },
     onChange (val) {
       this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
       this.$store.dispatch('setActiveName', 'indexFrame')
       let route = ''
-      this.options.map(item=>{
-        if(item.id === val){
+      this.options.map(item => {
+        if (item.id === val) {
           route = item.name
         }
       })

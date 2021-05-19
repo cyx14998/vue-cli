@@ -63,7 +63,7 @@
         </el-pagination>
       </el-col>
     </div>
-    <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" :routeData="routeData"/>
+    <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" :routeData="routeData" />
     <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
       :frameData="frameData" />
     <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".fdbt" ref="exportBtn"
@@ -300,17 +300,17 @@ export default {
       this.loading = flag
     },
     mulDel () {
-      this.$alert('是否删除?', '删除', {
-        // showCancelButton: true,
+      this.$alert('将删除所选框架，及其所有子框架和关联指标，是否继续？', '删除', {
+        showCancelButton: true,
         confirmButtonText: '确定',
-        // cancelButtonText: '取消',
+        cancelButtonText: '取消',
         callback: action => {
-          this.loading = true
-          let ids = []
-          this.multipleSelection.map(item => {
-            ids.push(item.id)
-          })
           if (action === 'confirm') {
+            this.loading = true
+            let ids = []
+            this.multipleSelection.map(item => {
+              ids.push(item.id)
+            })
             this.$http({
               url: '/api/databrowser/glTemplate/batchDeleteFramework',
               method: 'post',
@@ -332,6 +332,8 @@ export default {
                   message: res.message
                 });
               }
+            }).catch(() => {
+              this.loading = false
             })
           }
         }
