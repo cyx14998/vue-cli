@@ -93,7 +93,6 @@ export default {
   display: flex;
   flex: 1;
   height: 100%;
-  padding: 12px;
   overflow: auto;
   box-sizing: border-box;
   #left {

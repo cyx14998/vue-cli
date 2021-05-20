@@ -12,7 +12,14 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/index',
+            redirect: '/main',
+        }, {
+            path: '/main',
+            name: 'main',
+            component: resolve => require(["./pages/main.vue"], resolve),
+            meta: {
+                title: '钢联数据终端管理后台'
+            }
         }, {
             path: '/index',
             name: 'index',

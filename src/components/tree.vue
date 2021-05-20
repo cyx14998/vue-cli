@@ -187,6 +187,16 @@ export default {
 .tab-header {
   width: 200px;
   margin-top: 15px;
+
+  .el-tabs__nav {
+    width: 100%;
+  }
+
+  .el-tabs__nav .el-tabs__item {
+    width: 50%;
+    height: 28px;
+    line-height: 28px;
+  }
 }
 .tree {
   .treeContainer {
