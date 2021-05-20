@@ -114,7 +114,7 @@ export default {
       const { pageNo, pageSize } = this.pageParams
       this.loading = true
       this.$http({
-        url: '/api/databrowser/glTemplate/loadFrameworkByPage',
+        url: '/backapi/databrowser/glTemplate/loadFrameworkByPage',
         method: 'get',
         params: {
           sectionType: this.browsersType,
@@ -167,7 +167,7 @@ export default {
       let ids = [id]
       // 停用
       if (flag === 1) {
-        url = '/api/databrowser/glTemplate/updateFramework'
+        url = '/backapi/databrowser/glTemplate/updateFramework'
         params = {
           id,
           title,
@@ -179,7 +179,7 @@ export default {
         }
         // 启用
       } else if (flag === 2) {
-        url = '/api/databrowser/glTemplate/updateFramework'
+        url = '/backapi/databrowser/glTemplate/updateFramework'
         params = {
           id,
           title,
@@ -191,7 +191,7 @@ export default {
         }
         // 删除
       } else if (flag === 3) {
-        url = '/api/databrowser/glTemplate/batchDeleteFramework'
+        url = '/backapi/databrowser/glTemplate/batchDeleteFramework'
         params = JSON.stringify(ids)
       }
       this.$http({
@@ -257,7 +257,7 @@ export default {
               ids.push(item.id)
             })
             this.$http({
-              url: '/api/databrowser/glTemplate/batchDeleteFramework',
+              url: '/backapi/databrowser/glTemplate/batchDeleteFramework',
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {

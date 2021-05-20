@@ -160,7 +160,7 @@ export default {
       const { pageNo, pageSize } = this.pageParams
       this.loading = true
       this.$http({
-        url: '/api/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
+        url: '/backapi/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
         method: 'get',
         params: {
           sectionType: this.browsersType,
@@ -215,7 +215,7 @@ export default {
     changeNodeStatus (node) {
       this.loading = true
       this.$http({
-        url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+        url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
         method: 'post',
         params: JSON.stringify([node.id])
       }).then((res) => {
@@ -271,7 +271,7 @@ export default {
           })
           if (action === 'confirm') {
             this.$http({
-              url: '/api/databrowser/glTemplate/batchDeleteGlTemplate',
+              url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {

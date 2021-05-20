@@ -52,8 +52,29 @@ export default {
 
   },
   mounted () {
+    this.getData()
   },
   methods: {
+    getData () {
+      this.$http({
+        url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus',
+        method: 'post',
+        params: {
+          browserType: this.browsersType || 1,
+          // frameName: 'ces',
+          // isDelete: 1,
+        }
+      }).then((res) => {
+        if (res && res.success) {
+          console.log(res)
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          })
+        }
+      })
+    },
     submitForm () {
       let self = this
       this.$refs.indicatorForm.validate((valid) => {
@@ -62,7 +83,7 @@ export default {
           this.$parent.$parent.changeLoading(true)
           const { title, sortNo, flag, id } = this.templateData
           // 新增
-          let url = '/api/databrowser/glTemplate/addGlTemplate'
+          let url = '/backapi/databrowser/glTemplate/addGlTemplate'
           let formData = new FormData();
           formData.append('title', title);
           formData.append('sortNo', sortNo);
@@ -75,7 +96,7 @@ export default {
           }
           // 编辑
           if (flag !== 1) {
-            url = '/api/databrowser/glTemplate/updateGlTemplate'
+            url = '/backapi/databrowser/glTemplate/updateGlTemplate'
             formData.append('id', id);
           } else {
             formData.append('templateFile', this.templateData.templateFile);

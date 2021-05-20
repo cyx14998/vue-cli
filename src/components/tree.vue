@@ -79,7 +79,7 @@ export default {
     //获取树的所有节点
     getAllNodesById () {
       this.$http({
-        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
           sectionType: this.browsersType,
@@ -99,7 +99,7 @@ export default {
         return resolve(this.indexData);
       }
       this.$http({
-        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
           sectionType: this.browsersType,
@@ -121,7 +121,7 @@ export default {
         return resolve(this.scopeData);
       }
       this.$http({
-        url: '/api/databrowser/glTemplate/loadFrameworkTree',
+        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
           sectionType: this.browsersType,

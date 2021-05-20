@@ -3,7 +3,9 @@
   <div class="indexTable" ref="indexRef">
     <div class="action-btns marginb-10">
       <div class="btn-flex">
-        <el-button size="small">框架模板下载</el-button>
+        <el-button size="small">
+          <el-link :underline="false" :href="downLoadUrl" target="_self">框架模板下载</el-link>
+        </el-button>
         <el-button type="primary" size="small" @click="importTemplate">框架导入</el-button>
       </div>
       <div>
@@ -66,7 +68,7 @@
     <Route v-if="routeVisible" :visible="routeVisible" @close="routeClose" :routeData="routeData" />
     <FrameDialog v-if="frameDialogVisible" :visible="frameDialogVisible" @close="frameDialogClose"
       :frameData="frameData" />
-    <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".fdbt" ref="exportBtn"
+    <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".xlsx,.xls" ref="exportBtn"
       @change="importFileChange" />
   </div>
 </template>
@@ -74,6 +76,8 @@
 <script>
 import Route from './route'
 import FrameDialog from './frameDialog'
+import baseUrl from '../utils/env'
+
 export default {
   name: "TablePage",
   props: {
@@ -85,6 +89,7 @@ export default {
   },
   data () {
     return {
+      downLoadUrl: baseUrl + '/backapi/databrowser/systemIndexFrameBack/download',
       tableData: [{
         id: 110100000000,
         title: '基本资料',
@@ -132,7 +137,7 @@ export default {
       const { pageNo, pageSize } = this.pageParams
       this.loading = true
       this.$http({
-        url: '/api/databrowser/glTemplate/loadFrameworkByPage',
+        url: '/backapi/databrowser/glTemplate/loadFrameworkByPage',
         method: 'get',
         params: {
           sectionType: this.browsersType,
@@ -165,37 +170,39 @@ export default {
       try {
         this.changeLoading(true)
 
-        let url = '/api/databrowser/glTemplate/addGlTemplate'
+        let url = '/backapi/databrowser/systemIndexFrameBack/upload?browserType=1&parentId=-1'
         let formData = new FormData();
-        formData.append('templateFile', e.target.files[0]);
+        formData.append('file', e.target.files[0]);
         let config = {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
-        this.$axios.post(url, formData, config).then(function (res) {
-          self.changeLoading(false)
-          if (res.data && res.data.success) {
-            self.$message({
-              type: 'success',
-              message: res.data.message
-            })
-            self.$nextTick(() => {
-              self.getData()
-            })
-          } else {
+        this.$axios.post(url, formData, config)
+          .then(function (res) {
+            self.changeLoading(false)
+            if (res.data && res.data.success) {
+              self.$message({
+                type: 'success',
+                message: res.data.message
+              })
+              self.$nextTick(() => {
+                self.getData()
+              })
+            } else {
+              self.$message({
+                type: 'error',
+                message: res.data.message
+              })
+            }
+          })
+          .catch((res) => {
             self.$message({
               type: 'error',
-              message: res.data.message
+              message: res
             })
-          }
-        }).catch((res) => {
-          self.$message({
-            type: 'error',
-            message: res
+            self.changeLoading(false)
           })
-          self.changeLoading(false)
-        })
       } catch (e) {
         console.error(e)
       }
@@ -231,7 +238,7 @@ export default {
       let params = null
       // 停用
       if (flag === 1) {
-        url = '/api/databrowser/glTemplate/updateFramework'
+        url = '/backapi/databrowser/glTemplate/updateFramework'
         params = {
           id,
           title,
@@ -243,7 +250,7 @@ export default {
         }
         // 启用
       } else if (flag === 2) {
-        url = '/api/databrowser/glTemplate/updateFramework'
+        url = '/backapi/databrowser/glTemplate/updateFramework'
         params = {
           id,
           title,
@@ -312,7 +319,7 @@ export default {
               ids.push(item.id)
             })
             this.$http({
-              url: '/api/databrowser/glTemplate/batchDeleteFramework',
+              url: '/backapi/databrowser/glTemplate/batchDeleteFramework',
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {

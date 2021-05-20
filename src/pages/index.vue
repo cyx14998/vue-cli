@@ -56,7 +56,7 @@ export default {
   methods: {
     getSelectData () {
       this.$http({
-        url: '/api/databrowser/glTemplate/loadSectionSelectList',
+        url: '/backapi/databrowser/systemIndexFrameBack/download',
         method: 'get',
       }).then((res) => {
         if (res && res.success) {

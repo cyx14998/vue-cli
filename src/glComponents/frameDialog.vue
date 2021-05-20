@@ -67,7 +67,7 @@ export default {
           this.$parent.changeLoading(true)
           const { title, enName, sortNo, flag, status, id } = this.frameData
           // 新增
-          let url = '/api/databrowser/glTemplate/addFramework'
+          let url = '/backapi/databrowser/glTemplate/addFramework'
           let params = {
             title,
             enName,
@@ -78,7 +78,7 @@ export default {
           }
           // 编辑
           if (flag !== 1) {
-            url = '/api/databrowser/glTemplate/updateFramework'
+            url = '/backapi/databrowser/glTemplate/updateFramework'
             params = {
               ...params,
               status,

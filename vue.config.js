@@ -8,7 +8,7 @@ module.exports = {
     },
     chainWebpack: config => {
         config.plugin('html').tap(args => {
-            args[0].title = "数据浏览器后台";
+            args[0].title = "终端管理";
             return args;
         })
     },
@@ -25,13 +25,16 @@ module.exports = {
         port: '8181',
         hot: true,
         proxy: {
-            "/graphs_api": {
-                target: "https://crmdc.mysteelcms.com/", //生产
+            "/api/": {
+                target: "http://192.168.212.154:8080", // 祥辉本地
                 changeOrigin: true, //开启跨域
             },
-            "/api/": {
-                target: "http://192.168.212.154:8080", //生产
+            "/databrowser-api/": {
+                target: "http://192.168.212.161:8080", // 祥辉本地
                 changeOrigin: true, //开启跨域
+                pathRewrite: {
+                    '/databrowser-api/': '/'
+                }
             },
         }
     },
