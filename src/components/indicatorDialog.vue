@@ -5,7 +5,13 @@
       :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
       <el-form :model="indicatorData" ref="indicatorForm" :rules="rules">
         <el-form-item label="指标" label-width="120px" prop="title">
-          <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input>
+          <!-- <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input> -->
+          <el-select v-model="indicatorData.title" filterable placeholder="输入指标ID/指标名称" :filter-method="dataFilter"
+            @change="changeSel">
+            <el-option v-for="item in dataArr" :key="item.id" :label="item.frameName" :value="item.id">
+              <span>{{ item.id }}-{{ item.frameName }}</span>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortNo">
           <el-input-number size="small" v-model="indicatorData.sortNo" controls-position="right" :min="1">
@@ -36,6 +42,8 @@ export default {
           { required: true, message: '请输入指标ID/指标名称', trigger: 'blur' }
         ]
       },
+      dataArr: [],
+      dataArrCopy: [], // 筛选需要
     };
   },
   created () {
@@ -66,7 +74,7 @@ export default {
         }
       }).then((res) => {
         if (res && res.success) {
-          console.log(res)
+          this.dataArrCopy = this.dataArr = res.data
         } else {
           this.$message({
             type: 'error',
@@ -75,33 +83,39 @@ export default {
         }
       })
     },
+    dataFilter (val) {
+      if (val) {
+        this.dataArr = this.dataArrCopy.filter((item) => {
+          if (!!~item.id.indexOf(val) || !!~item.frameName.indexOf(val)) {
+            return true
+          }
+        })
+      } else {
+        this.dataArr = this.dataArrCopy
+      }
+    },
+    changeSel () {
+      this.dataArr = this.dataArrCopy
+    },
     submitForm () {
       let self = this
       this.$refs.indicatorForm.validate((valid) => {
         if (valid) {
           self.close();
           this.$parent.$parent.changeLoading(true)
-          const { title, sortNo, flag, id } = this.templateData
-          // 新增
-          let url = '/backapi/databrowser/glTemplate/addGlTemplate'
-          let formData = new FormData();
-          formData.append('title', title);
-          formData.append('sortNo', sortNo);
-          formData.append('sectionType', this.browsersType);
-          formData.append('parentId', this.nodeId);
-          let config = {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
+          const { title, sortNo, flag, id } = this.indicatorData
+          let params = {
+            title,
+            sortNo
           }
-          // 编辑
-          if (flag !== 1) {
-            url = '/backapi/databrowser/glTemplate/updateGlTemplate'
-            formData.append('id', id);
-          } else {
-            formData.append('templateFile', this.templateData.templateFile);
+          if (flag === 2) {
+            params.id = id
           }
-          this.$axios.post(url, formData, config).then(function (res) {
+          this.$http({
+            url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
+            method: 'post',
+            params
+          }).then(function (res) {
             self.$parent.$parent.changeLoading(false)
             if (res.data && res.data.success) {
               self.$message({

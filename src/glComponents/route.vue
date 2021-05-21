@@ -4,7 +4,7 @@
     <el-drawer :visible.sync="visible" :with-header="false" size="100%">
       <div class="zb-modal-header">
         <div class="zb-modal-header__title">
-          <h3 class="zb-modal-header__text"><span>关联模板  框架路径：{{route}}</span></h3>
+          <h3 class="zb-modal-header__text"><span>关联模板 框架路径：{{route}}</span></h3>
         </div>
         <div class="zb-modal-header__append">
           <el-button size="small" @click="closeModal">返回</el-button>
@@ -97,7 +97,7 @@ export default {
     let self = this
     window.onresize = () => {
       let bH = document.body.offsetHeight;
-      let sH = this.$refs.zb_table.$el.getBoundingClientRect().top;
+      let sH = self.$refs.zb_table.$el.getBoundingClientRect().top;
       let domH = self.$refs.zb_botAction.offsetHeight;
       self.zb_tableHeight = bH - sH - domH - 34
     }
@@ -195,17 +195,17 @@ export default {
       this.loading = flag
     },
     mulDel () {
-      this.$alert('是否删除?', '删除', {
-        // showCancelButton: true,
+      this.$alert('是否确认删除选中模板?', '删除', {
+        showCancelButton: true,
         confirmButtonText: '确定',
-        // cancelButtonText: '取消',
+        cancelButtonText: '取消',
         callback: action => {
-          this.loading = true
-          let ids = []
-          this.multipleSelection.map(item => {
-            ids.push(item.id)
-          })
           if (action === 'confirm') {
+            this.loading = true
+            let ids = []
+            this.multipleSelection.map(item => {
+              ids.push(item.id)
+            })
             this.$http({
               url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
               method: 'post',
