@@ -122,6 +122,7 @@ export default {
   },
   watch: {
     nodeId () {
+      this.pageParams = { ...this.pageParams, pageNo: 1 }
       this.getData()
     },
   },
