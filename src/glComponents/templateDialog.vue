@@ -11,11 +11,11 @@
           <el-input-number size="small" v-model="templateData.sortNo" controls-position="right" :min="1">
           </el-input-number>
         </el-form-item>
-        <el-form-item label-width="120px" prop="templateFile">
+        <el-form-item class="uploadCon" label-width="120px" prop="templateFile">
           <el-button size="small" type="primary" @click="handleChange">上传模板文件
-            <i v-if="templateData.templateFile !== null" class="el-icon-check"></i>
-            <!-- <i v-else class="el-icon-upload el-icon--right"></i> -->
+            <!-- <i v-if="templateData.templateFile !== null" class="el-icon-check"></i> -->
           </el-button>
+          <img class="uploadImg" v-if="templateData.templateFile !== null" src="../static/img/icon.png" alt="">
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -88,15 +88,15 @@ export default {
       this.$refs.frameForm.validate((valid) => {
         if (valid) {
           self.close();
-          this.$parent.$parent.changeLoading(true)
-          const { title, sortNo, flag, id } = this.templateData
+          self.$parent.$parent.changeLoading(true)
+          const { title, sortNo, flag, id } = self.templateData
           // 新增
           let url = '/backapi/databrowser/glTemplate/addGlTemplate'
           let formData = new FormData();
           formData.append('title', title);
           formData.append('sortNo', sortNo);
-          formData.append('sectionType', this.browsersType);
-          formData.append('parentId', this.nodeId);
+          formData.append('sectionType', self.browsersType);
+          formData.append('parentId', self.nodeId);
           let config = {
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -107,9 +107,9 @@ export default {
             url = '/backapi/databrowser/glTemplate/updateGlTemplate'
             formData.append('id', id);
           } else {
-            formData.append('templateFile', this.templateData.templateFile);
+            formData.append('templateFile', self.templateData.templateFile);
           }
-          this.$axios.post(url, formData, config).then(function (res) {
+          self.$axios.post(url, formData, config).then(function (res) {
             self.$parent.$parent.changeLoading(false)
             if (res.data && res.data.success) {
               self.$message({
@@ -148,4 +148,13 @@ export default {
 </script>
 
 <style scoped lang="less">
+.uploadCon {
+  .uploadImg {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+}
 </style>

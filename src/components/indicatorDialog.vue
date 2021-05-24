@@ -65,8 +65,8 @@ export default {
   methods: {
     getData () {
       this.$http({
-        url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus',
-        method: 'post',
+        url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByBrowserType',
+        method: 'get',
         params: {
           browserType: this.browsersType || 1,
           // frameName: 'ces',
@@ -102,8 +102,8 @@ export default {
       this.$refs.indicatorForm.validate((valid) => {
         if (valid) {
           self.close();
-          this.$parent.$parent.changeLoading(true)
-          const { title, sortNo, flag, id } = this.indicatorData
+          self.$parent.$parent.changeLoading(true)
+          const { title, sortNo, flag, id } = self.indicatorData
           let params = {
             title,
             sortNo
@@ -111,20 +111,18 @@ export default {
           if (flag === 2) {
             params.id = id
           }
-          this.$http({
+          self.$http({
             url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
             method: 'post',
             params
-          }).then(function (res) {
+          }).then((res) => {
             self.$parent.$parent.changeLoading(false)
             if (res.data && res.data.success) {
               self.$message({
                 type: 'success',
                 message: res.data.message
               })
-              self.$nextTick(() => {
-                self.$parent.$parent.getData()
-              })
+              self.$parent.$parent.getData()
             } else {
               self.$message({
                 type: 'error',
@@ -132,11 +130,11 @@ export default {
               })
             }
           }).catch((res) => {
+            self.$parent.$parent.changeLoading(false)
             self.$message({
               type: 'error',
               message: res
             })
-            self.$parent.$parent.changeLoading(false)
           })
         } else {
           return false;

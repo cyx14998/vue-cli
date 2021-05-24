@@ -61,19 +61,20 @@ export default {
   },
   methods: {
     submitForm () {
+      let self = this
       this.$refs.frameForm.validate((valid) => {
         if (valid) {
-          this.close();
-          this.$parent.changeLoading(true)
-          const { title, enName, sortNo, flag, status, id } = this.frameData
+          self.close();
+          self.$parent.changeLoading(true)
+          const { title, enName, sortNo, flag, status, id } = self.frameData
           // 新增
           let url = '/backapi/databrowser/glTemplate/addFramework'
           let params = {
             title,
             enName,
             sortNo,
-            sectionType: this.browsersType,
-            parentId: this.nodeId,
+            sectionType: self.browsersType,
+            parentId: self.nodeId,
             status: false
           }
           // 编辑
@@ -85,37 +86,37 @@ export default {
               id
             }
           }
-          this.$http({
+          self.$http({
             url,
             method: 'post',
             params
           }).then((res) => {
-            this.$parent.changeLoading(false)
+            self.$parent.changeLoading(false)
             if (res && res.success) {
-              this.$message({
+              self.$message({
                 type: 'success',
                 message: res.message
               })
               if (res.data) {
                 // 新增
                 if (flag === 1) {
-                  this.$parent.$parent.$refs.nodeTree.dealAddNode(res.data)
+                  self.$parent.$parent.$refs.nodeTree.dealAddNode(res.data)
                 } else {
                   // 编辑
-                  this.$parent.$parent.$refs.nodeTree.dealEditNode(res.data)
+                  self.$parent.$parent.$refs.nodeTree.dealEditNode(res.data)
                 }
               }
-              this.$nextTick(() => {
-                this.$parent.getData()
+              self.$nextTick(() => {
+                self.$parent.getData()
               })
             } else {
-              this.$message({
+              self.$message({
                 type: 'error',
                 message: res.message
               })
             }
           }).catch(() => {
-            this.$parent.changeLoading(false)
+            self.$parent.changeLoading(false)
           })
         } else {
           return false;
