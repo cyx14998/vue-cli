@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "IndexModal",
   props: {
@@ -50,12 +51,11 @@ export default {
   created () {
   },
   computed: {
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    }
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+    })
   },
   watch: {
 

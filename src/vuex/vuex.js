@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex);
 const state = {
-    browsersType: null, // 浏览器类型
+    browsersType: 1, // 浏览器类型
     activeName: 'indexFrame', // 框架名称
     filterParams: {
         name: '',

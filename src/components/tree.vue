@@ -10,7 +10,7 @@
         :load="loadIndexNode" lazy :expand-on-click-node="false" :props="defaultProps" @node-click="nodeClick"
         highlight-current>
         <span slot-scope="{ data }">
-          <span>{{ data.title }}</span>
+          <span>{{ data.frameName }}</span>
           <span v-if="!data.status" class="stop">（停）</span>
         </span>
       </el-tree>
@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "Tree",
   props: {
@@ -44,15 +45,11 @@ export default {
     };
   },
   computed: {
-    newActiveName () {
-      return this.$store.getters.getActiveName
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    },
-    nodeId () {
-      return this.$store.getters.getNodeId
-    }
+    ...mapState({
+      newActiveName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId'
+    })
   },
   watch: {
     // 监听浏览器类型改变
@@ -78,16 +75,29 @@ export default {
     },
     //获取树的所有节点
     getAllNodesById () {
-      this.$http({
-        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
-        method: 'get',
-        params: {
-          sectionType: this.browsersType,
-          id: -1,
+      let url = ''
+      let params = {}
+      if (this.activeName === 'indexFrame') {
+        url = ''
+        params = {}
+      } else {
+        url = '/backapi/databrowser/rangeframeback/getRangeFrameByParentId'
+        params = {
+          browserType: this.browsersType,
+          parentId: -1,
         }
+      }
+      this.$http({
+        url,
+        method: 'get',
+        params
       }).then((res) => {
         if (res && res.success) {
-          this.indexData = res.data
+          if (this.activeName === 'indexFrame') {
+            this.indexData = res.data
+          } else {
+            this.scopeData = res.data
+          }
         }
       })
     },
@@ -169,16 +179,17 @@ export default {
     dealDelNode (nodeArr) {
       if (this.activeName === 'indexFrame') {
         nodeArr.map(item => {
-          this.$refs.tree.remove(item)
+          this.$refs.indexTree.remove(item)
         })
       } else {
         nodeArr.map(item => {
-          this.$refs.tree.remove(item)
+          this.$refs.scopeTree.remove(item)
         })
       }
     }
   },
   created () {
+    this.getAllNodesById()
   }
 };
 </script>

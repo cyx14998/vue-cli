@@ -49,6 +49,7 @@
 
 <script>
 import TemplateDialog from './templateDialog'
+import { mapState } from 'vuex'
 export default {
   name: "RoutePage",
   props: {
@@ -76,15 +77,11 @@ export default {
   created () {
   },
   computed: {
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    route () {
-      return this.$store.getters.getRoute
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    },
+    ...mapState({
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+      route: 'route'
+    })
   },
   mounted () {
     this.getData()

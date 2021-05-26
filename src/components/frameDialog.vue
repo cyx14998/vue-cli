@@ -7,17 +7,17 @@
         <el-form-item label="是否叶子节点" label-width="120px" prop="isLeaf">
           <el-select v-model="frameData.isLeaf" style="width: 100%;">
             <el-option label="是" value="1"></el-option>
-            <el-option label="否" value="2"></el-option>
+            <el-option label="否" value="0"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="框架中文名称" label-width="120px" prop="cnName">
-          <el-input v-model="frameData.title"></el-input>
+        <el-form-item label="框架中文名称" label-width="120px" prop="frameName">
+          <el-input v-model="frameData.frameName"></el-input>
         </el-form-item>
-        <el-form-item label="框架英文名称" label-width="120px" prop="enName">
-          <el-input v-model="frameData.enName"></el-input>
+        <el-form-item label="框架英文名称" label-width="120px" prop="frameNameEn">
+          <el-input v-model="frameData.frameNameEn"></el-input>
         </el-form-item>
-        <el-form-item label="排序" label-width="120px" prop="sortNo">
-          <el-input-number size="small" v-model="frameData.sortNo" controls-position="right" :min="1">
+        <el-form-item label="排序" label-width="120px" prop="sortBy">
+          <el-input-number size="small" v-model="frameData.sortBy" controls-position="right" :min="1">
           </el-input-number>
         </el-form-item>
       </el-form>
@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "IndexModal",
   props: {
@@ -42,7 +43,7 @@ export default {
         isLeaf: [
           { required: true, message: '请选择', trigger: 'change' }
         ],
-        title: [
+        frameName: [
           { required: true, message: '请输入框架中文名称', trigger: 'blur' },
           { min: 1, max: 30, message: '长度不能超过30个字符', trigger: 'blur' }
         ],
@@ -50,8 +51,8 @@ export default {
           { required: false, message: '请输入框架英文名称', trigger: 'blur' },
           { min: 1, max: 50, message: '长度不能超过50个字符', trigger: 'blur' }
         ],
-        sortNo: [
-          { required: false, message: '', trigger: 'blur' }
+        sortBy: [
+          { required: true, message: '', trigger: 'blur' }
         ]
       }
     };
@@ -59,15 +60,11 @@ export default {
   created () {
   },
   computed: {
-    activeName () {
-      return this.$store.getters.getActiveName
-    },
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    }
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId'
+    })
   },
   mounted () {
   },
@@ -75,32 +72,34 @@ export default {
     submitForm () {
       this.$refs.frameForm.validate((valid) => {
         if (valid) {
-          if (this.activeName === 'indexFrame') {
-            console.log('新增指标框架')
-          } else {
-            console.log('新增范围框架')
-          }
           this.close();
           this.$parent.changeLoading(true)
-          const { title, enName, sortNo, flag, status, id } = this.frameData
-          // 新增
-          let url = '/backapi/databrowser/glTemplate/addFramework'
-          let params = {
-            title,
-            enName,
-            sortNo,
-            sectionType: this.browsersType,
-            parentId: this.nodeId,
-            status: false
-          }
-          // 编辑
-          if (flag !== 1) {
-            url = '/backapi/databrowser/glTemplate/updateFramework'
+          const { frameName, frameNameEn, sortBy, flag, isLeaf, id } = this.frameData
+          let url = ''
+          let params = {}
+          if (this.activeName === 'indexFrame') {
+            // 新增
+            url = '/backapi/databrowser/systemIndexFrameBack/addSystemIndexFrame'
             params = {
-              ...params,
-              status,
-              id
+              browserType: this.browsersType,
+              frameName,
+              frameNameEn: frameNameEn || '',
+              sortBy,
+              isLeaf: +isLeaf,
+              parentId: this.nodeId,
             }
+            // 编辑
+            if (flag !== 1) {
+              url = '/backapi/databrowser/systemIndexFrameBack/updateSystemIndexFrame'
+              params = {
+                ...params,
+                // status,
+                id
+              }
+            }
+            // console.log('新增指标框架')
+          } else {
+            console.log('新增范围框架')
           }
           this.$http({
             url,

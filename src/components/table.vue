@@ -92,12 +92,12 @@ export default {
       downLoadUrl: baseUrl + '/backapi/databrowser/systemIndexFrameBack/download',
       tableData: [{
         id: 110100000000,
-        title: '基本资料',
-        enName: 'base data',
+        frameName: '基本资料',
+        frameNameEn: 'base data',
         route: '指标框架|第二层',
         isLeaf: 1,
         status: 1,
-        sortNo: 1
+        sortBy: 1
       }],
       multipleSelection: [],
       pageParams: { // 分页参数obj
@@ -219,7 +219,7 @@ export default {
         ...data,
         isLeaf: flag === 2 ? '' + data.isLeaf : '',
         flag,
-        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        sortBy: flag === 2 ? '' + data.sortBy : 1,
         headTitle: flag === 1 ? '新增框架' : '编辑框架'
       }
       this.frameDialogVisible = true

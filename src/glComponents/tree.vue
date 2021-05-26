@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "Tree",
   props: {
@@ -30,12 +31,11 @@ export default {
     };
   },
   computed: {
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    },
-    nodeId () {
-      return this.$store.getters.getNodeId
-    }
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+    })
   },
   watch: {
     // 监听浏览器类型改变 清空数据

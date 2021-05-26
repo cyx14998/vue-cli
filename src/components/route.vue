@@ -85,6 +85,7 @@
 <script>
 import IndicatorDialog from './indicatorDialog'
 import RangeDialog from './rangeDialog'
+import { mapState } from 'vuex'
 export default {
   name: "Route",
   props: {
@@ -122,18 +123,12 @@ export default {
   created () {
   },
   computed: {
-    activeName () {
-      return this.$store.getters.getActiveName
-    },
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    route () {
-      return this.$store.getters.getRoute
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    },
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+      route: 'route'
+    })
   },
   watch: {
 

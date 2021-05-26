@@ -58,6 +58,7 @@
 <script>
 import Route from './route'
 import FrameDialog from './frameDialog'
+import { mapState } from 'vuex'
 export default {
   name: "TablePage",
   props: {
@@ -87,15 +88,11 @@ export default {
 
   },
   computed: {
-    activeName () {
-      return this.$store.getters.getActiveName
-    },
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    },
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+    })
   },
   watch: {
     nodeId () {

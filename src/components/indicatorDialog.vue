@@ -22,13 +22,12 @@
         <el-button size="small" @click="close">取 消</el-button>
         <el-button size="small" type="primary" @click="submitForm">确 定</el-button>
       </div>
-      <!-- <el-tree :props="props" :load="loadNode" lazy show-checkbox @check-change="handleCheckChange">
-      </el-tree> -->
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "IndicatorDialog",
   props: {
@@ -49,12 +48,10 @@ export default {
   created () {
   },
   computed: {
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    }
+    ...mapState({
+      browsersType: 'browsersType',
+      nodeId: 'nodeId'
+    })
   },
   watch: {
 
@@ -68,9 +65,7 @@ export default {
         url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByBrowserType',
         method: 'get',
         params: {
-          browserType: this.browsersType || 1,
-          // frameName: 'ces',
-          // isDelete: 1,
+          browserType: this.browsersType,
         }
       }).then((res) => {
         if (res && res.success) {

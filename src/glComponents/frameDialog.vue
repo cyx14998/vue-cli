@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: "FrameDialog",
   props: {
@@ -50,12 +51,10 @@ export default {
   created () {
   },
   computed: {
-    nodeId () {
-      return this.$store.getters.getNodeId
-    },
-    browsersType () {
-      return this.$store.getters.getBrowsersType
-    }
+    ...mapState({
+      browsersType: 'browsersType',
+      nodeId: 'nodeId'
+    })
   },
   mounted () {
   },
