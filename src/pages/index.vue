@@ -48,28 +48,48 @@ export default {
   data () {
     return {
       showTable: false,
-      options: [],
+      options: [
+        {
+          label: '期货数据浏览器',
+          value: '1',
+          id: '1'
+        },
+        {
+          label: '行情数据浏览器',
+          value: '2',
+          id: '2'
+        },
+        {
+          label: '宏观数据浏览器',
+          value: '3',
+          id: '3'
+        }
+      ],
       value: '',
       tableHeight: 0,
     };
   },
   methods: {
     getSelectData () {
-      this.$http({
-        url: '/backapi/databrowser/systemIndexFrameBack/download',
-        method: 'get',
-      }).then((res) => {
-        if (res && res.success) {
-          this.options = res.data
-          if (res.data && res.data.length) {
-            this.value = res.data[0].id
-            this.$store.dispatch('setBrowsersType', res.data[0].id)
-            this.$store.dispatch('setRoute', res.data[0].name)
-          }
-        } else {
-          this.$message.error(res.message || '获取下拉框板块出错!')
-        }
-      })
+      this.value = this.options[0].id
+      this.$store.dispatch('setBrowsersType', this.options[0].id)
+      this.$store.dispatch('setNodeId', 0)
+      this.$store.dispatch('setRoute', this.options[0].name)
+      // this.$http({
+      //   url: '/backapi/databrowser/systemIndexFrameBack/download',
+      //   method: 'get',
+      // }).then((res) => {
+      //   if (res && res.success) {
+      //     this.options = res.data
+      //     if (res.data && res.data.length) {
+      //       this.value = res.data[0].id
+      //       this.$store.dispatch('setBrowsersType', res.data[0].id)
+      //       this.$store.dispatch('setRoute', res.data[0].name)
+      //     }
+      //   } else {
+      //     this.$message.error(res.message || '获取下拉框板块出错!')
+      //   }
+      // })
     },
     onChange (val) {
       this.$store.dispatch('setNodeId', -1)

@@ -31,15 +31,15 @@ export default (options) => {
         data = {};
     }
     // 请求拦截
-    axios.interceptors.request.use(function (config) {
-        let token = localStorage.getItem("token")
-        if (token) {
-            config.headers['token'] = token;
-        }
-        return config;
-    }, function (error) {
-        return Promise.reject(error);
-    });
+    // axios.interceptors.request.use(function (config) {
+    //     let token = localStorage.getItem("token")
+    //     if (token) {
+    //         config.headers['token'] = token;
+    //     }
+    //     return config;
+    // }, function (error) {
+    //     return Promise.reject(error);
+    // });
 
     //响应拦截
     // axios.interceptors.response.use(response => {

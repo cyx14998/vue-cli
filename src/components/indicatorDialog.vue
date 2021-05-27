@@ -7,9 +7,9 @@
         <el-form-item label="指标" label-width="120px" prop="title">
           <!-- <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input> -->
           <el-select v-model="indicatorData.title" filterable placeholder="输入指标ID/指标名称" :filter-method="dataFilter"
-            @change="changeSel">
-            <el-option v-for="item in dataArr" :key="item.id" :label="item.frameName" :value="item.id">
-              <span>{{ item.id }}-{{ item.frameName }}</span>
+            @visible-change="changeSel($event)">
+            <el-option v-for="item in dataArr" :key="item.indexId" :label="item.indexName" :value="item.indexId">
+              <span>{{ item.indexId }}-{{ item.indexName }}</span>
             </el-option>
           </el-select>
         </el-form-item>
@@ -62,7 +62,7 @@ export default {
   methods: {
     getData () {
       this.$http({
-        url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByBrowserType',
+        url: '/backapi/databrowser/systemIndexBack/getAddSystemIndexName',
         method: 'get',
         params: {
           browserType: this.browsersType,
@@ -81,7 +81,7 @@ export default {
     dataFilter (val) {
       if (val) {
         this.dataArr = this.dataArrCopy.filter((item) => {
-          if (!!~item.id.indexOf(val) || !!~item.frameName.indexOf(val)) {
+          if (!!~item.indexId.indexOf(val) || !!~item.indexName.indexOf(val)) {
             return true
           }
         })
@@ -89,8 +89,10 @@ export default {
         this.dataArr = this.dataArrCopy
       }
     },
-    changeSel () {
-      this.dataArr = this.dataArrCopy
+    changeSel (callback) {
+      if (callback) {
+        this.dataArr = this.dataArrCopy
+      }
     },
     submitForm () {
       let self = this
@@ -112,16 +114,16 @@ export default {
             params
           }).then((res) => {
             self.$parent.$parent.changeLoading(false)
-            if (res.data && res.data.success) {
+            if (res && res.success) {
               self.$message({
                 type: 'success',
-                message: res.data.message
+                message: res.message
               })
               self.$parent.$parent.getData()
             } else {
               self.$message({
                 type: 'error',
-                message: res.data.message
+                message: res.message
               })
             }
           }).catch((res) => {

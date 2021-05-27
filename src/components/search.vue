@@ -4,13 +4,13 @@
     <div class="search-part marginb-10">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item>
-          <el-input v-model="formInline.name" placeholder="框架名称" :clearable="true"></el-input>
+          <el-input v-model="formInline.frameName" placeholder="框架名称" :clearable="true"></el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select class="width-100" v-model="formInline.status" placeholder="状态">
-            <el-option label="全部" value="0"></el-option>
-            <el-option label="启用" value="1"></el-option>
-            <el-option label="停用" value="2"></el-option>
+          <el-select class="width-100" v-model="formInline.isDelete" placeholder="状态">
+            <el-option label="全部" value="-1"></el-option>
+            <el-option label="启用" value="0"></el-option>
+            <el-option label="停用" value="1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -29,8 +29,8 @@ export default {
   data () {
     return {
       formInline: {
-        name: '',
-        status: '0'
+        frameName: '',
+        isDelete: '-1'
       }
     };
   },

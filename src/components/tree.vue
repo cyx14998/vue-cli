@@ -11,15 +11,15 @@
         highlight-current>
         <span slot-scope="{ data }">
           <span>{{ data.frameName }}</span>
-          <span v-if="!data.status" class="stop">（停）</span>
+          <!-- <span v-if="!data.status" class="stop">（停）</span> -->
         </span>
       </el-tree>
       <el-tree v-show="activeName === 'scopeFrame'" :data="scopeData" ref="scopeTree" node-key="id"
         :load="loadScopeNode" lazy :expand-on-click-node="false" :props="defaultProps" @node-click="nodeClick"
         highlight-current>
         <span slot-scope="{ data }">
-          <span>{{ data.title }}</span>
-          <span v-if="!data.status" class="stop">（停）</span>
+          <span>{{ data.frameName }}</span>
+          <!-- <span v-if="!data.status" class="stop">（停）</span> -->
         </span>
       </el-tree>
     </div>
@@ -78,10 +78,13 @@ export default {
       let url = ''
       let params = {}
       if (this.activeName === 'indexFrame') {
-        url = ''
-        params = {}
+        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId'
+        params = {
+          browserType: this.browsersType,
+          parentId: -1,
+        }
       } else {
-        url = '/backapi/databrowser/rangeframeback/getRangeFrameByParentId'
+        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId'
         params = {
           browserType: this.browsersType,
           parentId: -1,
@@ -109,15 +112,18 @@ export default {
         return resolve(this.indexData);
       }
       this.$http({
-        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
+        url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
-          id: node.data.id,
+          browserType: this.browsersType,
+          parentId: node.data.id,
         }
       }).then((res) => {
         if (res && res.success) {
-          return resolve(res.indexData);
+          return resolve(res.data);
+        } else {
+          this.$message.error(res.message || '获取下拉树出错!')
+          this.loading = false
         }
       }).catch(() => {
         this.loading = false
@@ -146,6 +152,7 @@ export default {
       })
     },
     nodeClick (nodeObj, node) {
+      console.log(1)
       this.$store.dispatch('setRoute', this.dealRoute(node, []))
       this.node = node
       this.$store.dispatch('setNodeId', nodeObj.id)

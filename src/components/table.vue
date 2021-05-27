@@ -20,9 +20,9 @@
       <el-table-column label="框架ID">
         <template slot-scope="scope">{{ scope.row.id }}</template>
       </el-table-column>
-      <el-table-column prop="cnName" label="框架中文名称" show-overflow-tooltip>
+      <el-table-column prop="frameName" label="框架中文名称" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column prop="enName" label="框架英文名称" show-overflow-tooltip>
+      <el-table-column prop="frameNameEn" label="框架英文名称" show-overflow-tooltip>
       </el-table-column>
       <el-table-column prop="route" label="框架路径">
       </el-table-column>
@@ -30,17 +30,16 @@
         <template slot-scope="scope">{{ scope.row.isLeaf ? '是' : '否' }}</template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="50">
-        <template slot-scope="scope">{{ scope.row.status === 1 ? '启用' : '停用' }}</template>
+        <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
       </el-table-column>
-      <el-table-column prop="sortNo" label="排序" width="50">
+      <el-table-column prop="sortBy" label="排序" width="50">
       </el-table-column>
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标
-          </el-button>
+          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标</el-button>
           <el-button type="text" v-else @click="openRoute(scope.row)">范围</el-button>
-          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
+          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.isDelete !== 1"
             @confirm="()=>{changeNodeStatus(1,scope.row)}">
             <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
@@ -78,6 +77,7 @@ import Route from './route'
 import FrameDialog from './frameDialog'
 import baseUrl from '../utils/env'
 
+import { mapState } from 'vuex'
 export default {
   name: "TablePage",
   props: {
@@ -90,15 +90,7 @@ export default {
   data () {
     return {
       downLoadUrl: baseUrl + '/backapi/databrowser/systemIndexFrameBack/download',
-      tableData: [{
-        id: 110100000000,
-        frameName: '基本资料',
-        frameNameEn: 'base data',
-        route: '指标框架|第二层',
-        isLeaf: 1,
-        status: 1,
-        sortBy: 1
-      }],
+      tableData: [],
       multipleSelection: [],
       pageParams: { // 分页参数obj
         pageNo: 1,
@@ -116,15 +108,25 @@ export default {
 
   },
   computed: {
-    activeName () {
-      return this.$store.getters.getActiveName
-    },
+    ...mapState({
+      activeName: 'activeName',
+      browsersType: 'browsersType',
+      nodeId: 'nodeId',
+      filterParams: 'filterParams'
+    })
   },
   watch: {
     nodeId () {
       this.pageParams = { ...this.pageParams, pageNo: 1 }
       this.getData()
     },
+    filterParams: {
+      handler () {
+        this.getData()
+      },
+      immediate: true,
+      deep: true
+    }
   },
   mounted () {
     // this.getData()
@@ -132,25 +134,40 @@ export default {
   methods: {
     getData () {
       this.multipleSelection = []
-      const filterParams = this.$store.getters.getFilterParams
-      console.log(filterParams)
+      let filterParams = this.$store.getters.getFilterParams
+      if (filterParams.isDelete === '-1') {
+        delete filterParams.isDelete
+      }
       this.multipleSelection = []
       const { pageNo, pageSize } = this.pageParams
       this.loading = true
-      this.$http({
-        url: '/backapi/databrowser/glTemplate/loadFrameworkByPage',
-        method: 'get',
-        params: {
-          sectionType: this.browsersType,
-          id: this.nodeId,
-          pageNo,
-          pageSize,
+      let url = ''
+      let params = {}
+      if (this.activeName === 'indexFrame') {
+        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus'
+        params = {
+          browserType: this.browsersType,
+          ...filterParams
         }
+      } else {
+        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus'
+        params = {
+          browserType: this.browsersType,
+          ...filterParams
+        }
+      }
+      if (this.nodeId !== 0) {
+        params.parentId = this.nodeId
+      }
+      this.$http({
+        url,
+        method: 'post',
+        params
       }).then((res) => {
         this.loading = false
         if (res && res.success) {
-          const { total, records } = res.data
-          this.tableData = records
+          const { total, data } = res.data
+          this.tableData = res.data
           this.pageParams = {
             ...this.pageParams,
             total,
