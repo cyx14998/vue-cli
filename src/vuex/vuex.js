@@ -2,14 +2,15 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex);
 const state = {
-    browsersType: 1, // 浏览器类型
+    browsersType: '1', // 浏览器类型
     activeName: 'indexFrame', // 框架名称
     filterParams: {
-        name: '',
-        status: ''
+        frameName: '',
+        isDelete: '-1'
     },  // 查询筛选 params
     nodeId: -1,
     route: '', // 框架路径
+    isLeaf: 0, // 是否是叶子节点 1是 0否
 }
 const getters = {
     getBrowsersType: state => {
@@ -43,6 +44,9 @@ const mutations = {
     },
     setRoute (state, route) {
         state.route = route;
+    },
+    setIsLeaf (state, isLeaf) {
+        state.isLeaf = isLeaf;
     }
 }
 const actions = {
@@ -60,6 +64,9 @@ const actions = {
     },
     setRoute (context, route) {
         context.commit('setRoute', route);
+    },
+    setIsLeaf (context, isLeaf) {
+        context.commit('setIsLeaf', isLeaf);
     }
 }
 export default new Vuex.Store({

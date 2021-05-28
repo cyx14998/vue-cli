@@ -37,19 +37,20 @@
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标</el-button>
+          <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标
+          </el-button>
           <el-button type="text" v-else @click="openRoute(scope.row)">范围</el-button>
-          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.isDelete !== 1"
+          <!-- <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.isDelete !== 1"
             @confirm="()=>{changeNodeStatus(1,scope.row)}">
             <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
           <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
-            @confirm="()=>{changeNodeStatus(2,scope.row)}">
+            @confirm="()=>{changeNodeStatus(0,scope.row)}">
             <el-button type="text" slot="reference">启用</el-button>
-          </el-popconfirm>
-          <!-- <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.nodeStatus != 1"
-            @click="changeNodeStatus(scope.row)">停用</el-button>
-          <el-button type="text" v-else @click="changeNodeStatus(scope.row)">启用</el-button> -->
+          </el-popconfirm> -->
+          <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.isDelete !== 1"
+            @click="changeNodeStatus(1,scope.row)">停用</el-button>
+          <el-button type="text" v-else @click="changeNodeStatus(0,scope.row)">启用</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -105,59 +106,61 @@ export default {
     };
   },
   created () {
-
+    this.getData()
   },
   computed: {
     ...mapState({
       activeName: 'activeName',
       browsersType: 'browsersType',
       nodeId: 'nodeId',
-      filterParams: 'filterParams'
+      filterParams: 'filterParams',
+      isLeaf: 'isLeaf'
     })
   },
   watch: {
-    nodeId () {
-      this.pageParams = { ...this.pageParams, pageNo: 1 }
-      this.getData()
-    },
-    filterParams: {
-      handler () {
-        this.getData()
-      },
-      immediate: true,
-      deep: true
-    }
   },
   mounted () {
-    // this.getData()
   },
   methods: {
-    getData () {
+    getData (flag) {
       this.multipleSelection = []
-      let filterParams = this.$store.getters.getFilterParams
-      if (filterParams.isDelete === '-1') {
-        delete filterParams.isDelete
-      }
       this.multipleSelection = []
       const { pageNo, pageSize } = this.pageParams
+      const { frameName, isDelete } = this.filterParams
       this.loading = true
       let url = ''
       let params = {}
       if (this.activeName === 'indexFrame') {
-        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus'
+        url = `/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
         params = {
           browserType: this.browsersType,
-          ...filterParams
+          parentId: this.nodeId,
+          pageNo,
+          pageSize,
+          frameName,
+          isDelete
         }
       } else {
-        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus'
+        url = `/backapi/databrowser/rangeframeback/getRangeFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
         params = {
           browserType: this.browsersType,
-          ...filterParams
+          parentId: this.nodeId,
+          pageNo,
+          pageSize,
+          frameName,
+          isDelete
         }
       }
-      if (this.nodeId !== 0) {
-        params.parentId = this.nodeId
+      if (params.isDelete === '-1') {
+        delete params.isDelete
+      }
+      // 重置pageNo
+      if (flag === 1) {
+        params.pageNo = 1
+        this.pageParams = {
+          ...this.pageParams,
+          pageNo: 1,
+        }
       }
       this.$http({
         url,
@@ -166,12 +169,14 @@ export default {
       }).then((res) => {
         this.loading = false
         if (res && res.success) {
-          const { total, data } = res.data
-          this.tableData = res.data
+          const { total, records } = res.data
+          this.tableData = records
           this.pageParams = {
             ...this.pageParams,
             total,
           }
+        } else {
+          this.$message.error(res.message || '获取table数据出错!')
         }
       }).catch(() => {
         this.loading = false
@@ -232,6 +237,13 @@ export default {
       this.frameDialogVisible = false
     },
     editNode (flag, data) {
+      if (flag === 1 && this.isLeaf === 1) {
+        this.$message({
+          type: 'info',
+          message: '叶子节点无法新增框架'
+        })
+        return
+      }
       this.frameData = {
         ...data,
         isLeaf: flag === 2 ? '' + data.isLeaf : '',
@@ -243,41 +255,42 @@ export default {
     },
     // 打开指标||范围页面
     openRoute (data) {
+      if (data.isLeaf !== 1) {
+        if (this.activeName === 'indexFrame') {
+          this.$message({
+            type: 'info',
+            message: '非叶子节点无法关联指标'
+          })
+        } else {
+          this.$message({
+            type: 'info',
+            message: '非叶子节点无法关联范围'
+          })
+        }
+        return
+      }
       this.routeData = {
         ...data
       }
       this.routeVisible = true
     },
-    // 停用1||启用2
+    // 停用1||启用0
     changeNodeStatus (flag, node) {
       this.loading = true
-      const { id, title, enName, sortNo } = node
+      const { id, frameName, frameNameEn, sortBy, isLeaf } = node
       let url = ''
-      let params = null
-      // 停用
-      if (flag === 1) {
-        url = '/backapi/databrowser/glTemplate/updateFramework'
-        params = {
-          id,
-          title,
-          enName,
-          sortNo,
-          parentId: this.nodeId,
-          status: false,
-          sectionType: this.browsersType,
-        }
-        // 启用
-      } else if (flag === 2) {
-        url = '/backapi/databrowser/glTemplate/updateFramework'
-        params = {
-          id,
-          title,
-          enName,
-          sortNo,
-          parentId: this.nodeId,
-          status: true,
-          sectionType: this.browsersType,
-        }
+      if (this.activeName === 'indexFrame') {
+        url = '/backapi/databrowser/systemIndexFrameBack/updateSystemIndexFrame'
+      } else {
+        url = '/backapi/databrowser/rangeFrameBack/updateRangeFrame'
+      }
+      let params = {
+        id,
+        frameName,
+        frameNameEn,
+        sortBy,
+        isLeaf,
+        isDelete: flag
       }
       this.$http({
         url,

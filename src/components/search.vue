@@ -2,11 +2,11 @@
 <template>
   <div class="right-top-part">
     <div class="search-part marginb-10">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
-        <el-form-item>
+      <el-form :inline="true" ref="formInline" :model="formInline" class="form-inline">
+        <el-form-item prop="frameName">
           <el-input v-model="formInline.frameName" placeholder="框架名称" :clearable="true"></el-input>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item label="状态" prop="isDelete">
           <el-select class="width-100" v-model="formInline.isDelete" placeholder="状态">
             <el-option label="全部" value="-1"></el-option>
             <el-option label="启用" value="0"></el-option>
@@ -31,7 +31,7 @@ export default {
       formInline: {
         frameName: '',
         isDelete: '-1'
-      }
+      },
     };
   },
   created () {
@@ -41,14 +41,16 @@ export default {
 
   },
   mounted () {
-
   },
   methods: {
     onSubmit () {
-      this.$store.dispatch("setFilterParams", {...this.formInline})
-      console.log('submit!');
-      console.log(this.formInline)
-    }
+      this.$store.dispatch("setFilterParams", { ...this.formInline })
+      this.$store.dispatch('setNodeId', '-1')
+      this.$parent.$refs.tablePage.getData(1)
+    },
+    resetForm () {
+      this.$refs['formInline'].resetFields();
+    },
   }
 };
 </script>

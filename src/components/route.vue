@@ -19,21 +19,18 @@
         <el-table v-if="activeName === 'indexFrame'" :data="tableData" ref="zb_table" size="small" border
           v-loading="loading" class="zb-modal-table" :height="zb_tableHeight" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
-          <el-table-column property="id" label="指标ID" width="150"></el-table-column>
-          <el-table-column property="name" label="指标名称" width="300"></el-table-column>
-          <el-table-column property="status" label="状态"></el-table-column>
-          <el-table-column property="sortNo" label="排序"></el-table-column>
+          <el-table-column property="indexId" label="指标ID" width="150"></el-table-column>
+          <el-table-column property="indexName" label="指标名称" width="300"></el-table-column>
+          <el-table-column property="isDelete" label="状态">
+            <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
+          </el-table-column>
+          <el-table-column property="sortBy" label="排序"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus != 1"
-                @confirm="()=>{changeNodeStatus(scope.row)}">
-                <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
-              </el-popconfirm>
-              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
-                @confirm="()=>{changeNodeStatus(scope.row)}">
-                <el-button type="text" slot="reference">启用</el-button>
-              </el-popconfirm>
+              <el-button v-if="scope.row.isDelete !== 1" icon="el-icon-delete" class="delBtn" type="text"
+                slot="reference" @click="changeNodeStatus(1,scope.row)">停用</el-button>
+              <el-button v-else type="text" slot="reference" @click="changeNodeStatus(0,scope.row)">启用</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -42,20 +39,15 @@
           <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column property="name" label="范围名称" width="300"></el-table-column>
           <el-table-column property="filter" label="状态参数过滤条件" width="400"></el-table-column>
-          <el-table-column property="status" label="状态">
-            <template slot-scope="scope">{{ scope.row.status === 1 ? '启用' : '停用' }}</template>
+          <el-table-column property="isDelete" label="状态">
+            <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="rangeModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.nodeStatus === 1"
-                @confirm="()=>{changeNodeStatus(scope.row)}">
-                <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
-              </el-popconfirm>
-              <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
-                @confirm="()=>{changeNodeStatus(scope.row)}">
-                <el-button type="text" slot="reference">启用</el-button>
-              </el-popconfirm>
+              <el-button icon="el-icon-delete" v-if="scope.row.nodeStatus === 1" class="delBtn" type="text"
+                slot="reference" @click="changeNodeStatus(1,scope.row)">停用</el-button>
+              <el-button type="text" v-else slot="reference" @click="changeNodeStatus(0,scope.row)">启用</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -98,14 +90,7 @@ export default {
   },
   data () {
     return {
-      tableData: [{
-        id: '110100000000',
-        name: '基本资料',
-        route: '指标框架|第二层',
-        isLeaf: false,
-        status: 1,
-        sortNo: 1
-      }],
+      tableData: [],
       multipleSelection: [],
       pageParams: { // 分页参数obj
         pageNo: 1,
@@ -153,13 +138,18 @@ export default {
     getData () {
       this.multipleSelection = []
       const { pageNo, pageSize } = this.pageParams
+      const { id } = this.routeData
       this.loading = true
+      let url = ''
+      if (this.activeName === 'indexFrame') {
+        url = '/backapi/databrowser/systemIndexFrameRelationBack/getSystemIndexRelationByFrameId/' + id
+      } else {
+        url = '/backapi/databrowser/systemIndexFrameRelationBack/getSystemIndexRelationByFrameId/' + id
+      }
       this.$http({
-        url: '/backapi/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
+        url,
         method: 'get',
         params: {
-          sectionType: this.browsersType,
-          id: this.nodeId,
           pageNo,
           pageSize,
         }
@@ -185,7 +175,7 @@ export default {
       this.rangeData = {
         ...data,
         flag,
-        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        sortBy: flag === 2 ? '' + data.sortBy : 1,
         headTitle: flag === 1 ? '新增范围' : '编辑范围'
       }
       this.rangeDialogVisible = true
@@ -195,10 +185,12 @@ export default {
     },
     // 指标 新增||编辑 弹窗
     indicatorModal (flag, data) {
+      const { id } = this.routeData
       this.indicatorData = {
         ...data,
         flag,
-        sortNo: flag === 2 ? '' + data.sortNo : 1,
+        frameId: id,
+        sortBy: flag === 2 ? '' + data.sortBy : 1,
         headTitle: flag === 1 ? '新增指标' : '编辑指标'
       }
       this.indicatorDialogVisible = true
@@ -207,12 +199,18 @@ export default {
       this.indicatorDialogVisible = false
     },
 
-    changeNodeStatus (node) {
+    changeNodeStatus (flag, node) {
       this.loading = true
+      const { id, indexId, indexName } = node
       this.$http({
-        url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
+        url: '/backapi/databrowser/systemIndexFrameRelationBack/updateSystemIndexRelation',
         method: 'post',
-        params: JSON.stringify([node.id])
+        params: {
+          id,
+          indexId,
+          indexName,
+          isDelete: flag,
+        }
       }).then((res) => {
         this.loading = false
         if (res && res.success) {
@@ -254,19 +252,25 @@ export default {
       this.loading = flag
     },
     mulDel () {
-      this.$alert('是否删除?', '删除', {
-        // showCancelButton: true,
+      let message
+      if (this.activeName === 'indexFrame') {
+        message = '将删除所选指标，是否继续？'
+      } else {
+        message = '将删除所选范围，是否继续？'
+      }
+      this.$alert(message, '删除', {
+        showCancelButton: true,
         confirmButtonText: '确定',
-        // cancelButtonText: '取消',
+        cancelButtonText: '取消',
         callback: action => {
-          this.loading = true
-          let ids = []
-          this.multipleSelection.map(item => {
-            ids.push(item.id)
-          })
           if (action === 'confirm') {
+            this.loading = true
+            let ids = []
+            this.multipleSelection.map(item => {
+              ids.push(item.id)
+            })
             this.$http({
-              url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
+              url: '/backapi/databrowser/systemIndexFrameRelationBack/delSystemIndexRelation',
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {

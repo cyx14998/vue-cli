@@ -1,6 +1,6 @@
 <template>
   <div id="el-main">
-    <diV id="left">
+    <diV id="left" v-loading="treeLoading">
       <el-select v-model="value" placeholder="请选择" @change="onChange">
         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
@@ -39,10 +39,12 @@ export default {
     })
     let self = this
     window.onresize = () => {
-      let bH = document.body.offsetHeight;
-      let sH = self.$refs.tablePage.$el.getBoundingClientRect().top;
-      let domH = self.$refs.tablePage.$refs.botAction.offsetHeight;
-      self.tableHeight = bH - sH - domH - 62
+      if (self.$refs.tablePage.$el) {
+        let bH = document.body.offsetHeight;
+        let sH = self.$refs.tablePage.$el.getBoundingClientRect().top;
+        let domH = self.$refs.tablePage.$refs.botAction.offsetHeight;
+        self.tableHeight = bH - sH - domH - 62
+      }
     }
   },
   data () {
@@ -67,13 +69,14 @@ export default {
       ],
       value: '',
       tableHeight: 0,
+      treeLoading: false,
     };
   },
   methods: {
     getSelectData () {
       this.value = this.options[0].id
       this.$store.dispatch('setBrowsersType', this.options[0].id)
-      this.$store.dispatch('setNodeId', 0)
+      // this.$store.dispatch('setNodeId', '-1')
       this.$store.dispatch('setRoute', this.options[0].name)
       // this.$http({
       //   url: '/backapi/databrowser/systemIndexFrameBack/download',
@@ -108,6 +111,9 @@ export default {
     },
     refreshTree (nodeId) {
       this.$refs.nodeTree.getAllNodesById(nodeId);
+    },
+    changeTreeLoading (flag) {
+      this.treeLoading = flag
     }
   }
 };

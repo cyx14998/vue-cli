@@ -76,18 +76,17 @@ export default {
           this.$parent.changeLoading(true)
           const { frameName, frameNameEn, sortBy, flag, isLeaf, id } = this.frameData
           let url = ''
-          let params = {}
+          let params = {
+            browserType: this.browsersType,
+            frameName,
+            frameNameEn: frameNameEn || '',
+            sortBy,
+            isLeaf: +isLeaf,
+            parentId: this.nodeId,
+          }
           if (this.activeName === 'indexFrame') {
             // 新增
             url = '/backapi/databrowser/systemIndexFrameBack/addSystemIndexFrame'
-            params = {
-              browserType: this.browsersType,
-              frameName,
-              frameNameEn: frameNameEn || '',
-              sortBy,
-              isLeaf: +isLeaf,
-              parentId: this.nodeId,
-            }
             // 编辑
             if (flag !== 1) {
               url = '/backapi/databrowser/systemIndexFrameBack/updateSystemIndexFrame'
@@ -97,9 +96,18 @@ export default {
                 id
               }
             }
-            // console.log('新增指标框架')
           } else {
-            console.log('新增范围框架')
+            // 新增
+            url = '/backapi/databrowser/rangeFrameBack/addRangeFrame'
+            // 编辑
+            if (flag !== 1) {
+              url = '/backapi/databrowser/rangeFrameBack/updateRangeFrame'
+              params = {
+                ...params,
+                // status,
+                id
+              }
+            }
           }
           this.$http({
             url,

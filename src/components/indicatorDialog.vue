@@ -4,17 +4,17 @@
     <el-dialog :title="indicatorData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
       :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
       <el-form :model="indicatorData" ref="indicatorForm" :rules="rules">
-        <el-form-item label="指标" label-width="120px" prop="title">
+        <el-form-item label="指标" label-width="120px" prop="indexId">
           <!-- <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input> -->
-          <el-select v-model="indicatorData.title" filterable placeholder="输入指标ID/指标名称" :filter-method="dataFilter"
+          <el-select v-model="indicatorData.indexId" filterable placeholder="输入指标ID/指标名称" :filter-method="dataFilter"
             @visible-change="changeSel($event)">
             <el-option v-for="item in dataArr" :key="item.indexId" :label="item.indexName" :value="item.indexId">
               <span>{{ item.indexId }}-{{ item.indexName }}</span>
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="排序" label-width="120px" prop="sortNo">
-          <el-input-number size="small" v-model="indicatorData.sortNo" controls-position="right" :min="1">
+        <el-form-item label="排序" label-width="120px" prop="sortBy">
+          <el-input-number size="small" v-model="indicatorData.sortBy" controls-position="right" :min="1">
           </el-input-number>
         </el-form-item>
       </el-form>
@@ -37,7 +37,7 @@ export default {
   data () {
     return {
       rules: {
-        title: [
+        indexId: [
           { required: true, message: '请输入指标ID/指标名称', trigger: 'blur' }
         ]
       },
@@ -98,18 +98,38 @@ export default {
       let self = this
       this.$refs.indicatorForm.validate((valid) => {
         if (valid) {
+          const { id, frameId, indexId, sortBy, flag } = this.indicatorData
           self.close();
           self.$parent.$parent.changeLoading(true)
-          const { title, sortNo, flag, id } = self.indicatorData
-          let params = {
-            title,
-            sortNo
+          let len = this.dataArrCopy.length
+          let indexName
+          for (let i = 0; i < len; i++) {
+            let item = this.dataArrCopy[i]
+            if (item.indexId === indexId) {
+              indexName = item.indexName
+            }
           }
-          if (flag === 2) {
-            params.id = id
+          let url = ''
+          let params = {}
+          if (flag === 1) {
+            url = '/backapi/databrowser/systemIndexFrameRelationBack/addSystemIndexRelation'
+            params = {
+              frameId,
+              indexId,
+              indexName,
+              sortBy,
+            }
+          } else if (flag === 2) { // 编辑
+            url = '/backapi/databrowser/systemIndexFrameRelationBack/updateSystemIndexRelation'
+            params = {
+              id,
+              indexId,
+              indexName,
+              sortBy,
+            }
           }
           self.$http({
-            url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
+            url,
             method: 'post',
             params
           }).then((res) => {

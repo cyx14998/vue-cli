@@ -7,16 +7,14 @@
         <el-tab-pane label="范围框架" name="scopeFrame"></el-tab-pane>
       </el-tabs>
       <el-tree v-show="activeName === 'indexFrame'" :data="indexData" ref="indexTree" node-key="id"
-        :load="loadIndexNode" lazy :expand-on-click-node="false" :props="defaultProps" @node-click="nodeClick"
-        highlight-current>
+        :load="loadIndexNode" lazy :props="defaultProps" @node-click="nodeClick" highlight-current>
         <span slot-scope="{ data }">
           <span>{{ data.frameName }}</span>
           <!-- <span v-if="!data.status" class="stop">（停）</span> -->
         </span>
       </el-tree>
       <el-tree v-show="activeName === 'scopeFrame'" :data="scopeData" ref="scopeTree" node-key="id"
-        :load="loadScopeNode" lazy :expand-on-click-node="false" :props="defaultProps" @node-click="nodeClick"
-        highlight-current>
+        :load="loadScopeNode" lazy :props="defaultProps" @node-click="nodeClick" highlight-current>
         <span slot-scope="{ data }">
           <span>{{ data.frameName }}</span>
           <!-- <span v-if="!data.status" class="stop">（停）</span> -->
@@ -54,27 +52,25 @@ export default {
   watch: {
     // 监听浏览器类型改变
     browsersType () {
+      this.activeName = 'indexFrame'
       this.getAllNodesById(this.id)
       this.$emit('getTableData')
     },
   },
   methods: {
     tabChange (e) {
-      this.data = []
-      if (e.name === 'indexFrame') {
-        // 指标框架 调用接口
-        this.id = 1
-      } else {
-        this.id = 2
-        // 范围框架 调用接口
-      }
-      this.$store.dispatch('setActiveName', e.name)
-      this.getAllNodesById(this.id)
       this.activeName = e.name
-      this.$emit('getTableData')
+      this.$store.dispatch('setActiveName', e.name)
+      this.$store.dispatch('setNodeId', '-1')
+      this.$store.dispatch('setIsLeaf', '0')
+      this.$nextTick(() => {
+        this.getAllNodesById(this.id)
+        this.$emit('getTableData')
+      })
     },
     //获取树的所有节点
     getAllNodesById () {
+      this.$parent.changeTreeLoading(true)
       let url = ''
       let params = {}
       if (this.activeName === 'indexFrame') {
@@ -84,7 +80,7 @@ export default {
           parentId: -1,
         }
       } else {
-        url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId'
+        url = '/backapi/databrowser/rangeframeback/getRangeFrameByParentId'
         params = {
           browserType: this.browsersType,
           parentId: -1,
@@ -95,14 +91,17 @@ export default {
         method: 'get',
         params
       }).then((res) => {
+        this.$parent.changeTreeLoading(false)
         if (res && res.success) {
           if (this.activeName === 'indexFrame') {
             this.indexData = res.data
           } else {
             this.scopeData = res.data
           }
+        } else {
+          this.$message.error(res.message || '获取tree数据出错!')
         }
-      })
+      }).catch(() => { this.$parent.changeTreeLoading(false) })
     },
     // append方法在lazy模式下不起作用，只能用这种方式
     loadIndexNode (node, resolve) {
@@ -122,11 +121,8 @@ export default {
         if (res && res.success) {
           return resolve(res.data);
         } else {
-          this.$message.error(res.message || '获取下拉树出错!')
-          this.loading = false
+          this.$message.error(res.message || '获取指标框架出错!')
         }
-      }).catch(() => {
-        this.loading = false
       })
     },
     // append方法在lazy模式下不起作用，只能用这种方式
@@ -137,25 +133,30 @@ export default {
         return resolve(this.scopeData);
       }
       this.$http({
-        url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
+        url: '/backapi/databrowser/rangeframeback/getRangeFrameByParentId',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
-          id: node.data.id,
+          browserType: this.browsersType,
+          parentId: node.data.id,
         }
       }).then((res) => {
         if (res && res.success) {
-          return resolve(res.scopeData);
+          return resolve(res.data);
+        } else {
+          this.$message.error(res.message || '获取范围框架出错!')
         }
-      }).catch(() => {
-        this.loading = false
       })
     },
     nodeClick (nodeObj, node) {
-      console.log(1)
       this.$store.dispatch('setRoute', this.dealRoute(node, []))
       this.node = node
       this.$store.dispatch('setNodeId', nodeObj.id)
+      this.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
+      this.$store.dispatch('setIsLeaf', nodeObj.isLeaf)
+      this.$nextTick(() => {
+        this.$parent.$refs.search.resetForm()
+        this.$parent.$refs.tablePage.getData(1)
+      })
     },
     dealRoute (node, route) {
       if (node.parent && node.parent != null) {
@@ -168,7 +169,11 @@ export default {
     dealAddNode (nodeObj) {
       let node = this.node
       if (node) {
-        this.loadNode(node, node.resolve) // 调用接口方式更新tree 可以直接排序
+        if (this.activeName === 'indexFrame') {
+          this.loadIndexNode(node, node.resolve) // 调用接口方式更新tree 可以直接排序
+        } else {
+          this.loadScopeNode(node, node.resolve) // 调用接口方式更新tree 可以直接排序
+        }
         // let children = [];
         // children.push(nodeObj);
         // node.childNodes.forEach(d => children.push(d.data));

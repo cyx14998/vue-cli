@@ -1,6 +1,6 @@
 <template>
   <div id="el-main">
-    <diV id="left">
+    <diV id="left" v-loading="treeLoading">
       <el-select v-model="value" placeholder="请选择" @change="onChange">
         <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
         </el-option>
@@ -28,6 +28,7 @@ export default {
       options: [],
       value: '',
       tableHeight: 0,
+      treeLoading: false
     };
   },
   created () {
@@ -43,18 +44,23 @@ export default {
     })
     let self = this
     window.onresize = () => {
-      let bH = document.body.offsetHeight
-      let sH = self.$refs.tablePage.$el.getBoundingClientRect().top
-      let domH = self.$refs.tablePage.$refs.botAction.offsetHeight
-      self.tableHeight = bH - sH - domH - 82
+      if (self.$refs.tablePage.$el) {
+        let bH = document.body.offsetHeight
+        let sH = self.$refs.tablePage.$el.getBoundingClientRect().top
+        let domH = self.$refs.tablePage.$refs.botAction.offsetHeight
+        self.tableHeight = bH - sH - domH - 82
+      }
+
     }
   },
   methods: {
     getSelectData () {
+      this.treeLoading = true
       this.$http({
         url: '/backapi/databrowser/glTemplate/loadSectionSelectList',
         method: 'get',
       }).then((res) => {
+        this.treeLoading = false
         if (res && res.success) {
           this.options = res.data
           if (res.data && res.data.length) {
@@ -65,14 +71,14 @@ export default {
         } else {
           this.$message.error(res.message || '获取下拉框板块出错!')
         }
-      });
+      }).catch(() => { this.treeLoading = false })
     },
     onChange (val) {
       this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
       let route = ''
-      this.options.map(item=>{
-        if(item.id === val){
+      this.options.map(item => {
+        if (item.id === val) {
           route = item.name
         }
       })
@@ -83,6 +89,9 @@ export default {
     },
     refreshTree (nodeId) {
       this.$refs.nodeTree.getAllNodesById(nodeId)
+    },
+    changeTreeLoading (flag) {
+      this.treeLoading = flag
     }
   }
 };

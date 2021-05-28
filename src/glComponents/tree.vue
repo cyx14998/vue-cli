@@ -47,6 +47,7 @@ export default {
   },
   methods: {
     getAllNodesById () {
+      this.$parent.changeTreeLoading(true)
       //获取树的所有节点
       this.$http({
         url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
@@ -56,11 +57,12 @@ export default {
           id: -1,
         }
       }).then((res) => {
+        this.$parent.changeTreeLoading(false)
         if (res && res.success) {
           this.data = res.data
         }
       }).catch((err) => {
-        this.loading = false
+        this.$parent.changeTreeLoading(false)
         this.$message({
           type: 'error',
           message: err
@@ -85,9 +87,7 @@ export default {
         if (res && res.success) {
           return resolve(res.data);
         }
-      }).catch(() => {
-        this.loading = false
-      })
+      }).catch(() => { })
     },
     nodeClick (nodeObj, node) {
       this.$store.dispatch('setRoute', this.dealRoute(node, []))
