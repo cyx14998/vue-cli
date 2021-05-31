@@ -80,7 +80,7 @@ export default {
   },
   computed: {
     ...mapState({
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
       route: 'route'
     })
@@ -110,7 +110,7 @@ export default {
         url: '/backapi/databrowser/glTemplate/listPageGlTemplateByFrameworkId',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
+          sectionType: this.browserType,
           id: this.nodeId,
           pageNo,
           pageSize,

@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     ...mapState({
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId'
     })
   },
@@ -65,7 +65,7 @@ export default {
         url: '/backapi/databrowser/systemIndexBack/getAddSystemIndexName',
         method: 'get',
         params: {
-          browserType: this.browsersType,
+          browserType: this.browserType,
         }
       }).then((res) => {
         if (res && res.success) {

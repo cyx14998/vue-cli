@@ -110,7 +110,7 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
       route: 'route'
     })

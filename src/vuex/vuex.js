@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex);
 const state = {
-    browsersType: '1', // 浏览器类型
+    browserType: '1', // 浏览器类型
     activeName: 'indexFrame', // 框架名称
     filterParams: {
         frameName: '',
@@ -14,7 +14,7 @@ const state = {
 }
 const getters = {
     getBrowsersType: state => {
-        return state.browsersType;
+        return state.browserType;
     },
     getActiveName: state => {
         return state.activeName;
@@ -30,8 +30,8 @@ const getters = {
     }
 }
 const mutations = {
-    setBrowsersType (state, browsersType) {
-        state.browsersType = browsersType;
+    setBrowsersType (state, browserType) {
+        state.browserType = browserType;
     },
     setActiveName (state, activeName) {
         state.activeName = activeName;
@@ -50,8 +50,8 @@ const mutations = {
     }
 }
 const actions = {
-    setBrowsersType (context, browsersType) {
-        context.commit('setBrowsersType', browsersType);
+    setBrowsersType (context, browserType) {
+        context.commit('setBrowsersType', browserType);
     },
     setActiveName (context, activeName) {
         context.commit('setActiveName', activeName);

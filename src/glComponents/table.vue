@@ -96,7 +96,7 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
     })
   },
@@ -105,7 +105,7 @@ export default {
       this.pageParams = { ...this.pageParams, pageNo: 1 }
       this.getData()
     },
-    // browsersType () {
+    // browserType () {
     //   this.getData()
     // },
   },
@@ -121,7 +121,7 @@ export default {
         url: '/backapi/databrowser/glTemplate/loadFrameworkByPage',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
+          sectionType: this.browserType,
           id: this.nodeId,
           pageNo,
           pageSize,
@@ -215,7 +215,7 @@ export default {
             sortNo,
             parentId: this.nodeId,
             status: false,
-            sectionType: this.browsersType,
+            sectionType: this.browserType,
           }
           // 启用
         } else if (flag === 2) {
@@ -227,7 +227,7 @@ export default {
             sortNo,
             parentId: this.nodeId,
             status: true,
-            sectionType: this.browsersType,
+            sectionType: this.browserType,
           }
         }
         this.$http({

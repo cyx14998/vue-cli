@@ -111,7 +111,7 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
       filterParams: 'filterParams',
       isLeaf: 'isLeaf'
@@ -133,7 +133,7 @@ export default {
       if (this.activeName === 'indexFrame') {
         url = `/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
         params = {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: this.nodeId,
           pageNo,
           pageSize,
@@ -144,7 +144,7 @@ export default {
       } else {
         url = `/backapi/databrowser/rangeFrameBack/getRangeFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
         params = {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: this.nodeId,
           pageNo,
           pageSize,
@@ -197,9 +197,9 @@ export default {
         this.changeLoading(true)
         let url = ''
         if (this.activeName === 'indexFrame') {
-          url = `/backapi/databrowser/systemIndexFrameBack/upload?browserType=${this.browsersType}&parentId=-1`
+          url = baseUrl + `/backapi/databrowser/systemIndexFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId}`
         } else {
-          url = `/backapi/databrowser/rangeFrameBack/upload?browserType=${this.browsersType}&parentId=-1`
+          url = baseUrl + `/backapi/databrowser/rangeFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId}`
         }
         let formData = new FormData();
         formData.append('file', e.target.files[0]);

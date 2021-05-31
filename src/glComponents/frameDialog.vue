@@ -52,7 +52,7 @@ export default {
   },
   computed: {
     ...mapState({
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId'
     })
   },
@@ -72,7 +72,7 @@ export default {
             title,
             enName,
             sortNo,
-            sectionType: self.browsersType,
+            sectionType: self.browserType,
             parentId: self.nodeId,
             status: false
           }

@@ -55,7 +55,7 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
     })
   },
@@ -69,7 +69,7 @@ export default {
     } else {
       this.rules.templateFile[0].required = false
     }
-    if (this.browsersType == '0') {
+    if (this.browserType == '0') {
       this.accept = '.mtext'
     }
     // console.log(this.templateData)
@@ -100,7 +100,7 @@ export default {
           let formData = new FormData();
           formData.append('title', title);
           formData.append('sortNo', sortNo);
-          formData.append('sectionType', self.browsersType);
+          formData.append('sectionType', self.browserType);
           formData.append('parentId', self.nodeId);
           let config = {
             headers: {

@@ -33,13 +33,13 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId',
     })
   },
   watch: {
     // 监听浏览器类型改变 清空数据
-    browsersType () {
+    browserType () {
       this.node = undefined
       this.getAllNodesById()
       this.$emit('getTableData')
@@ -54,7 +54,7 @@ export default {
         url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
+          sectionType: this.browserType,
           id: -1,
         }
       }).then((res) => {
@@ -81,7 +81,7 @@ export default {
         url: '/backapi/databrowser/glTemplate/loadFrameworkTree',
         method: 'get',
         params: {
-          sectionType: this.browsersType,
+          sectionType: this.browserType,
           id: node.data.id,
         }
       }).then((res) => {

@@ -47,13 +47,13 @@ export default {
   computed: {
     ...mapState({
       newActiveName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId'
     })
   },
   watch: {
     // 监听浏览器类型改变
-    browsersType () {
+    browserType () {
       this.activeName = 'indexFrame'
       this.getAllNodesById(this.id)
       this.$emit('getTableData')
@@ -81,13 +81,13 @@ export default {
       if (this.activeName === 'indexFrame') {
         url = '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId'
         params = {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: -1,
         }
       } else {
         url = '/backapi/databrowser/rangeFrameBack/getRangeFrameByParentId'
         params = {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: -1,
         }
       }
@@ -124,7 +124,7 @@ export default {
         url: '/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByParentId',
         method: 'get',
         params: {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: node.data.id,
         }
       }).then((res) => {
@@ -151,7 +151,7 @@ export default {
         url: '/backapi/databrowser/rangeFrameBack/getRangeFrameByParentId',
         method: 'get',
         params: {
-          browserType: this.browsersType,
+          browserType: this.browserType,
           parentId: node.data.id,
         }
       }).then((res) => {

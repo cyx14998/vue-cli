@@ -62,7 +62,7 @@ export default {
   computed: {
     ...mapState({
       activeName: 'activeName',
-      browsersType: 'browsersType',
+      browserType: 'browserType',
       nodeId: 'nodeId'
     })
   },
@@ -77,7 +77,7 @@ export default {
           const { frameName, frameNameEn, sortBy, flag, isLeaf, id } = this.frameData
           let url = ''
           let params = {
-            browserType: this.browsersType,
+            browserType: this.browserType,
             frameName,
             frameNameEn: frameNameEn || '',
             sortBy,
