@@ -22,7 +22,7 @@
         <el-button size="small" @click="close">取 消</el-button>
         <el-button size="small" type="primary" @click="submitForm">确 定</el-button>
       </div>
-      <input style="width:0px;height:0px;" id="exportTemplate" type="file" accept=".fdbt" ref="exportBtn"
+      <input style="width:0px;height:0px;" id="exportTemplate" type="file" :accept="accept" ref="exportBtn"
         @change="exportFileChange" />
     </el-dialog>
   </div>
@@ -30,6 +30,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import baseUrl from '@/utils/env'
 export default {
   name: "IndexModal",
   props: {
@@ -38,6 +39,7 @@ export default {
   },
   data () {
     return {
+      accept: '.fdbt',
       rules: {
         title: [
           { required: true, message: '请输入模板名称', trigger: 'blur' }
@@ -67,6 +69,9 @@ export default {
     } else {
       this.rules.templateFile[0].required = false
     }
+    if (this.browsersType == '0') {
+      this.accept = '.mtext'
+    }
     // console.log(this.templateData)
   },
   methods: {
@@ -89,9 +94,9 @@ export default {
         if (valid) {
           self.close();
           self.$parent.$parent.changeLoading(true)
-          const { title, sortNo, flag, id } = self.templateData
+          const { title, sortNo, flag, id, templateFile } = self.templateData
           // 新增
-          let url = '/backapi/databrowser/glTemplate/addGlTemplate'
+          let url = baseUrl + '/backapi/databrowser/glTemplate/addGlTemplate'
           let formData = new FormData();
           formData.append('title', title);
           formData.append('sortNo', sortNo);
@@ -104,10 +109,11 @@ export default {
           }
           // 编辑
           if (flag !== 1) {
-            url = '/backapi/databrowser/glTemplate/updateGlTemplate'
+            url = baseUrl + '/backapi/databrowser/glTemplate/updateGlTemplate'
             formData.append('id', id);
-          } else {
-            formData.append('templateFile', self.templateData.templateFile);
+          }
+          if (templateFile) {
+            formData.append('templateFile', templateFile);
           }
           self.$axios.post(url, formData, config).then(function (res) {
             self.$parent.$parent.changeLoading(false)

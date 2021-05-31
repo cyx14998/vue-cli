@@ -30,7 +30,9 @@ module.exports = {
                 changeOrigin: true, //开启跨域
             },
             "/databrowser-api/": {
-                target: "http://192.168.212.161:8080", // 祥辉本地
+                // target: "http://192.168.202.5:8080", // 测试地址
+                target: "http://192.168.212.161:8080", // 道江本地
+                // target: "http://192.168.212.154:8080", // 祥辉本地
                 changeOrigin: true, //开启跨域
                 pathRewrite: {
                     '/databrowser-api/': '/'

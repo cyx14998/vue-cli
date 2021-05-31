@@ -20,10 +20,12 @@
           <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
-              <el-popconfirm class="marginl10 displayi-b" title="是否删除?" v-if="scope.row.nodeStatus != 1"
-                @confirm="()=>{changeNodeStatus(scope.row)}">
+              <!-- <el-popconfirm class="marginl10 displayi-b" title="是否删除?" v-if="scope.row.nodeStatus != 1"
+                @confirm="()=>{dealFrame(scope.row)}">
                 <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">删除</el-button>
-              </el-popconfirm>
+              </el-popconfirm> -->
+              <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference"
+                @click="dealFrame(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -145,29 +147,40 @@ export default {
       this.templateDialogVisible = false
     },
 
-    changeNodeStatus (node) {
-      this.loading = true
-      this.$http({
-        url: '/backapi/databrowser/glTemplate/batchDeleteGlTemplate',
-        method: 'post',
-        params: JSON.stringify([node.id])
-      }).then((res) => {
-        this.loading = false
-        if (res && res.success) {
-          this.$message({
-            type: 'success',
-            message: res.message
-          });
-          this.getData()
-        } else {
-          this.$message({
-            type: 'error',
-            message: res.message
-          });
+    dealFrame (node) {
+      this.$alert('是否确认删除该框架?', '', {
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        callback: action => {
+          if (action === 'confirm') {
+            this.loading = true
+            this.$http({
+              url: '/backapi/databrowser/glTemplate/batchDeleteFramework',
+              method: 'post',
+              params: JSON.stringify([node.id])
+            }).then((res) => {
+              this.loading = false
+              if (res && res.success) {
+                this.$message({
+                  type: 'success',
+                  message: res.message
+                });
+                this.getData()
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.message
+                });
+              }
+            }).catch(() => {
+              this.loading = false
+            })
+          } else {
+            this.loading = false
+          }
         }
-      }).catch(() => {
-        this.loading = false
-      })
+      });
     },
     // 每页显示多少 change
     handleSizeChange (val) {

@@ -124,7 +124,6 @@ export default {
   methods: {
     getData (flag) {
       this.multipleSelection = []
-      this.multipleSelection = []
       const { pageNo, pageSize } = this.pageParams
       const { frameName, isDelete } = this.filterParams
       this.loading = true

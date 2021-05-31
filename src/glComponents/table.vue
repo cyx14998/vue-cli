@@ -24,17 +24,23 @@
       <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
           <el-button type="text" @click="editNode(2,scope.row)">编辑</el-button>
-          <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.status"
+          <!-- <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.status"
             @confirm="()=>{changeNodeStatus(1,scope.row)}">
             <el-button class="delBtn" type="text" slot="reference">停用</el-button>
           </el-popconfirm>
           <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
             @confirm="()=>{changeNodeStatus(2,scope.row)}">
             <el-button type="text" slot="reference">启用</el-button>
-          </el-popconfirm>
-          <el-popconfirm class="marginl10 displayi-b" title="是否删除?" @confirm="()=>{changeNodeStatus(3,scope.row)}">
-            <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">删除</el-button>
-          </el-popconfirm>
+          </el-popconfirm> 
+          <el-popconfirm class="marginl10 displayi-b" title="是否确认删除该框架?" @confirm="()=>{changeNodeStatus(3,scope.row)}">
+            <el-button icon="el-icon-delete displayi-b" class="delBtn" type="text" slot="reference">删除</el-button>
+          </el-popconfirm>-->
+          <el-button class="delBtn marginl10 displayi-b" type="text" slot="reference" v-if="scope.row.status"
+            @click="changeNodeStatus(1,scope.row)">停用</el-button>
+          <el-button type="text" slot="reference" v-else @click="changeNodeStatus(2,scope.row)">启用</el-button>
+          <el-button icon="el-icon-delete" class="delBtn marginl10 displayi-b" type="text" slot="reference"
+            @click="changeNodeStatus(3,scope.row)">删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -158,67 +164,95 @@ export default {
     },
     // 停用1||启用2||删除3
     changeNodeStatus (flag, node) {
-      this.loading = true
       const { id, title, enName, sortNo } = node
       let url = ''
       let params = null
       let ids = [id]
-      // 停用
-      if (flag === 1) {
-        url = '/backapi/databrowser/glTemplate/updateFramework'
-        params = {
-          id,
-          title,
-          enName,
-          sortNo,
-          parentId: this.nodeId,
-          status: false,
-          sectionType: this.browsersType,
+      if (flag === 3) {
+        this.$alert('是否确认删除该框架?', '', {
+          showCancelButton: true,
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          callback: action => {
+            if (action === 'confirm') {
+              this.loading = true
+              this.$http({
+                url: '/backapi/databrowser/glTemplate/batchDeleteFramework',
+                method: 'post',
+                params: JSON.stringify(ids)
+              }).then((res) => {
+                this.loading = false
+                if (res && res.success) {
+                  this.$message({
+                    type: 'success',
+                    message: res.message
+                  });
+                  this.$parent.$refs.nodeTree.dealDelNode(this.multipleSelection)
+                  this.$nextTick(() => {
+                    this.getData()
+                  })
+                } else {
+                  this.$message({
+                    type: 'error',
+                    message: res.message
+                  });
+                }
+              })
+            } else {
+              this.loading = false
+            }
+          }
+        });
+      } else {
+        this.loading = true
+        // 停用
+        if (flag === 1) {
+          url = '/backapi/databrowser/glTemplate/updateFramework'
+          params = {
+            id,
+            title,
+            enName,
+            sortNo,
+            parentId: this.nodeId,
+            status: false,
+            sectionType: this.browsersType,
+          }
+          // 启用
+        } else if (flag === 2) {
+          url = '/backapi/databrowser/glTemplate/updateFramework'
+          params = {
+            id,
+            title,
+            enName,
+            sortNo,
+            parentId: this.nodeId,
+            status: true,
+            sectionType: this.browsersType,
+          }
         }
-        // 启用
-      } else if (flag === 2) {
-        url = '/backapi/databrowser/glTemplate/updateFramework'
-        params = {
-          id,
-          title,
-          enName,
-          sortNo,
-          parentId: this.nodeId,
-          status: true,
-          sectionType: this.browsersType,
-        }
-        // 删除
-      } else if (flag === 3) {
-        url = '/backapi/databrowser/glTemplate/batchDeleteFramework'
-        params = JSON.stringify(ids)
-      }
-      this.$http({
-        url,
-        method: 'post',
-        params
-      }).then((res) => {
-        this.loading = false
-        if (res && res.success) {
-          this.$message.success(res.message);
-          // 删除
-          if (flag === 3) {
-            this.$parent.$refs.nodeTree.dealDelNode([node])
-          } else {
+        this.$http({
+          url,
+          method: 'post',
+          params
+        }).then((res) => {
+          this.loading = false
+          if (res && res.success) {
+            this.$message.success(res.message);
             // 切换状态（启用||停用）
             this.$parent.$refs.nodeTree.dealEditNode(res.data)
+            this.$nextTick(() => {
+              this.getData()
+            })
+          } else {
+            this.$message({
+              type: 'error',
+              message: res.message
+            });
           }
-          this.$nextTick(() => {
-            this.getData()
-          })
-        } else {
-          this.$message({
-            type: 'error',
-            message: res.message
-          });
-        }
-      }).catch(() => {
-        this.loading = false
-      })
+        }).catch(() => {
+          this.loading = false
+        })
+      }
     },
     // 每页显示多少 change
     handleSizeChange (val) {
@@ -243,10 +277,10 @@ export default {
       this.loading = flag
     },
     mulDel () {
-      this.$alert('是否确认删除选中框架?', '删除', {
-        // showCancelButton: true,
+      this.$alert('是否确认删除选中框架?', '', {
+        showCancelButton: true,
         confirmButtonText: '确定',
-        // cancelButtonText: '取消',
+        cancelButtonText: '取消',
         callback: action => {
           if (action === 'confirm') {
             this.loading = true
@@ -296,8 +330,8 @@ export default {
 }
 .delBtn.el-button {
   color: red;
-  & + span {
-    margin-left: 0;
-  }
+  // & + span {
+  //   margin-left: 0;
+  // }
 }
 </style>

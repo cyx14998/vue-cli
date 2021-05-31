@@ -35,6 +35,7 @@ export default {
       indexData: [],
       scopeData: [],
       defaultProps: {
+        isLeaf: 'leaf',
         children: "nodeInfo",
         label: "nodeName"
       },
@@ -64,9 +65,11 @@ export default {
       this.$store.dispatch('setActiveName', e.name)
       this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setIsLeaf', 0)
+      this.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
       this.$nextTick(() => {
         this.getAllNodesById(this.id)
-        this.$emit('getTableData')
+        this.$parent.$refs.search.resetForm()
+        this.$parent.$refs.tablePage.getData(1)
       })
     },
     //获取树的所有节点
@@ -95,6 +98,11 @@ export default {
       }).then((res) => {
         this.$parent.changeTreeLoading(false)
         if (res && res.success) {
+          res.data && res.data.length ? res.data.map((item) => {
+            if (item.isLeaf === 1) {
+              item.leaf = true
+            }
+          }) : ''
           if (this.activeName === 'indexFrame') {
             this.indexData = res.data
           } else {
@@ -121,6 +129,11 @@ export default {
         }
       }).then((res) => {
         if (res && res.success) {
+          res.data && res.data.length ? res.data.map((item) => {
+            if (item.isLeaf === 1) {
+              item.leaf = true
+            }
+          }) : ''
           return resolve(res.data);
         } else {
           this.$message.error(res.message || '获取指标框架出错!')
@@ -143,6 +156,11 @@ export default {
         }
       }).then((res) => {
         if (res && res.success) {
+          res.data && res.data.length ? res.data.map((item) => {
+            if (item.isLeaf === 1) {
+              item.leaf = true
+            }
+          }) : ''
           return resolve(res.data);
         } else {
           this.$message.error(res.message || '获取范围框架出错!')
@@ -152,8 +170,8 @@ export default {
     nodeClick (nodeObj, node) {
       this.node = node
       this.$store.dispatch('setRoute', this.dealRoute(node, []))
-      this.$store.dispatch('setNodeId', nodeObj.id)
       this.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
+      this.$store.dispatch('setNodeId', nodeObj.id)
       this.$store.dispatch('setIsLeaf', nodeObj.isLeaf)
       this.$nextTick(() => {
         this.$parent.$refs.search.resetForm()
