@@ -39,7 +39,8 @@ export default {
         label: "nodeName"
       },
       visible: false,
-      activeName: 'indexFrame'
+      activeName: 'indexFrame',
+      node: ''
     };
   },
   computed: {
@@ -61,8 +62,8 @@ export default {
     tabChange (e) {
       this.activeName = e.name
       this.$store.dispatch('setActiveName', e.name)
-      this.$store.dispatch('setNodeId', '-1')
-      this.$store.dispatch('setIsLeaf', '0')
+      this.$store.dispatch('setNodeId', -1)
+      this.$store.dispatch('setIsLeaf', 0)
       this.$nextTick(() => {
         this.getAllNodesById(this.id)
         this.$emit('getTableData')
@@ -70,6 +71,7 @@ export default {
     },
     //获取树的所有节点
     getAllNodesById () {
+      this.node = ''
       this.$parent.changeTreeLoading(true)
       let url = ''
       let params = {}
@@ -80,7 +82,7 @@ export default {
           parentId: -1,
         }
       } else {
-        url = '/backapi/databrowser/rangeframeback/getRangeFrameByParentId'
+        url = '/backapi/databrowser/rangeFrameBack/getRangeFrameByParentId'
         params = {
           browserType: this.browsersType,
           parentId: -1,
@@ -133,7 +135,7 @@ export default {
         return resolve(this.scopeData);
       }
       this.$http({
-        url: '/backapi/databrowser/rangeframeback/getRangeFrameByParentId',
+        url: '/backapi/databrowser/rangeFrameBack/getRangeFrameByParentId',
         method: 'get',
         params: {
           browserType: this.browsersType,
@@ -148,8 +150,8 @@ export default {
       })
     },
     nodeClick (nodeObj, node) {
-      this.$store.dispatch('setRoute', this.dealRoute(node, []))
       this.node = node
+      this.$store.dispatch('setRoute', this.dealRoute(node, []))
       this.$store.dispatch('setNodeId', nodeObj.id)
       this.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
       this.$store.dispatch('setIsLeaf', nodeObj.isLeaf)

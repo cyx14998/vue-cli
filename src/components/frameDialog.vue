@@ -84,6 +84,8 @@ export default {
             isLeaf: +isLeaf,
             parentId: this.nodeId,
           }
+          
+          // 指标框架
           if (this.activeName === 'indexFrame') {
             // 新增
             url = '/backapi/databrowser/systemIndexFrameBack/addSystemIndexFrame'
@@ -97,8 +99,10 @@ export default {
               }
             }
           } else {
+            // 范围框架
+
             // 新增
-            url = '/backapi/databrowser/rangeFrameBack/addRangeFrame'
+            url = '/backapi/databrowser/rangeFrameBack/saveRangeFrame'
             // 编辑
             if (flag !== 1) {
               url = '/backapi/databrowser/rangeFrameBack/updateRangeFrame'

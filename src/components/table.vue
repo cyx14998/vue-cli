@@ -90,7 +90,7 @@ export default {
   },
   data () {
     return {
-      downLoadUrl: baseUrl + '/backapi/databrowser/systemIndexFrameBack/download',
+      downLoadUrl: '',
       tableData: [],
       multipleSelection: [],
       pageParams: { // 分页参数obj
@@ -129,6 +129,7 @@ export default {
       const { frameName, isDelete } = this.filterParams
       this.loading = true
       let url = ''
+      let downLoadUrl = ''
       let params = {}
       if (this.activeName === 'indexFrame') {
         url = `/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
@@ -140,8 +141,9 @@ export default {
           frameName,
           isDelete
         }
+        downLoadUrl = baseUrl + '/backapi/databrowser/systemIndexFrameBack/download'
       } else {
-        url = `/backapi/databrowser/rangeframeback/getRangeFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
+        url = `/backapi/databrowser/rangeFrameBack/getRangeFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
         params = {
           browserType: this.browsersType,
           parentId: this.nodeId,
@@ -150,7 +152,9 @@ export default {
           frameName,
           isDelete
         }
+        downLoadUrl = baseUrl + '/backapi/databrowser/rangeFrameBack/download'
       }
+      this.downLoadUrl = downLoadUrl
       if (params.isDelete === '-1') {
         delete params.isDelete
       }
@@ -192,8 +196,12 @@ export default {
       let self = this
       try {
         this.changeLoading(true)
-
-        let url = '/backapi/databrowser/systemIndexFrameBack/upload?browserType=1&parentId=-1'
+        let url = ''
+        if (this.activeName === 'indexFrame') {
+          url = `/backapi/databrowser/systemIndexFrameBack/upload?browserType=${this.browsersType}&parentId=-1`
+        } else {
+          url = `/backapi/databrowser/rangeFrameBack/upload?browserType=${this.browsersType}&parentId=-1`
+        }
         let formData = new FormData();
         formData.append('file', e.target.files[0]);
         let config = {

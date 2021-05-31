@@ -47,6 +47,7 @@ export default {
   },
   methods: {
     getAllNodesById () {
+      this.node = ''
       this.$parent.changeTreeLoading(true)
       //获取树的所有节点
       this.$http({

@@ -121,17 +121,21 @@ export default {
   mounted () {
     this.getData()
     this.$nextTick(() => {
-      let bH = document.body.offsetHeight;
-      let sH = this.$refs.zb_table.$el.getBoundingClientRect().top;
-      let domH = this.$refs.zb_botAction.offsetHeight;
-      this.zb_tableHeight = bH - sH - domH - 34
+      if (this.$refs.zb_table.$el) {
+        let bH = document.body.offsetHeight;
+        let sH = this.$refs.zb_table.$el.getBoundingClientRect().top;
+        let domH = this.$refs.zb_botAction.offsetHeight;
+        this.zb_tableHeight = bH - sH - domH - 34
+      }
     })
     let self = this
     window.onresize = () => {
-      let bH = document.body.offsetHeight;
-      let sH = self.$refs.zb_table.$el.getBoundingClientRect().top;
-      let domH = self.$refs.zb_botAction.offsetHeight;
-      self.zb_tableHeight = bH - sH - domH - 34
+      if (self.$refs.zb_table.$el) {
+        let bH = document.body.offsetHeight;
+        let sH = self.$refs.zb_table.$el.getBoundingClientRect().top;
+        let domH = self.$refs.zb_botAction.offsetHeight;
+        self.zb_tableHeight = bH - sH - domH - 34
+      }
     }
   },
   methods: {
