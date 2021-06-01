@@ -25,7 +25,7 @@
             <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
           </el-table-column>
           <el-table-column property="sortBy" label="排序"></el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="150">
             <template slot-scope="scope">
               <el-button type="text" @click="indicatorModal(2,scope.row)">编辑</el-button>
               <el-button v-if="scope.row.isDelete !== 1" icon="el-icon-delete" class="delBtn" type="text"
@@ -42,7 +42,7 @@
           <el-table-column property="isDelete" label="状态">
             <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="150">
             <template slot-scope="scope">
               <el-button type="text" @click="rangeModal(2,scope.row)">编辑</el-button>
               <el-button icon="el-icon-delete" v-if="scope.row.isDelete !== 1" class="delBtn" type="text"

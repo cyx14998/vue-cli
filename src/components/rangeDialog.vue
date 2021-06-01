@@ -1,15 +1,15 @@
 // 新增||编辑 范围
 <template>
   <div class="modal frame-modal">
-    <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px"
-      destroy-on-close :show-close="false" :modal-append-to-body="false" :before-close="close">
+    <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px" destroy-on-close :show-close="false"
+      :modal-append-to-body="false" :before-close="close">
       <el-form :model="rangeData" ref="frameForm" :rules="rules" hide-required-asterisk v-loading="rangeLoading">
         <el-form-item label-width="140px" prop="rangeVal" class="treeOuter">
           <span slot="label"><span class="red">*</span> 范围</span>
           <el-select v-model="rangeVal" multiple placeholder="请选择" @change="changeData" style="width: 100%;"
             :disabled="rangeLoading">
             <el-option style="height: auto;max-height: 600px;overflow: auto;" :value="SelectedArray"
-              v-if="dataList.length">
+              v-if="dataList.length" disabled>
               <el-tree :props="defaultProps" node-key="id" :loading="rangeLoading" ref="rangeTree" :data="dataList"
                 show-checkbox @check-change="handleCheckChange">
               </el-tree>
@@ -312,5 +312,8 @@ export default {
 .el-select-dropdown__item.hover,
 .el-select-dropdown__item:hover {
   background: #fff;
+}
+.el-select-dropdown__list .el-select-dropdown__item {
+  overflow: hidden !important;
 }
 </style>
