@@ -1,99 +1,42 @@
 // 新增||编辑 范围
 <template>
   <div class="modal frame-modal">
-    <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
-      :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
-      <el-form :model="rangeData" ref="frameForm" :rules="rules">
-        <el-form-item label="范围" label-width="130px" prop="range" class="treeOuter">
-          <!-- <el-select v-model="rangeData.range" style="width: 100%;">
-            <el-option label="是" value="1"></el-option>
-            <el-option label="否" value="2"></el-option>
-          </el-select> -->
-          <el-select v-model="rangeVal" multiple placeholder="请选择" @change="changeData" style="width: 100%;">
-            <el-option style="height: auto;max-height: 600px;overflow: auto;" :value="SelectedArray">
-              <el-tree :props="defaultProps" node-key="id" ref="rangeTree" :data="dataList" show-checkbox
-                @check-change="handleCheckChange">
+    <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px"
+      destroy-on-close :show-close="false" :modal-append-to-body="false" :before-close="close">
+      <el-form :model="rangeData" ref="frameForm" :rules="rules" hide-required-asterisk v-loading="rangeLoading">
+        <el-form-item label-width="140px" prop="rangeVal" class="treeOuter">
+          <span slot="label"><span class="red">*</span> 范围</span>
+          <el-select v-model="rangeVal" multiple placeholder="请选择" @change="changeData" style="width: 100%;"
+            :disabled="rangeLoading">
+            <el-option style="height: auto;max-height: 600px;overflow: auto;" :value="SelectedArray"
+              v-if="dataList.length">
+              <el-tree :props="defaultProps" node-key="id" :loading="rangeLoading" ref="rangeTree" :data="dataList"
+                show-checkbox @check-change="handleCheckChange">
               </el-tree>
+            </el-option>
+            <el-option v-else disabled value="">
+              暂无数据
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="成分参数过滤条件" label-width="130px" prop="filter">
-          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 10}" v-model="rangeData.filter"></el-input>
+        <el-form-item label-width="140px" prop="rangeConditions">
+          <span slot="label"><span class="red">*</span> 成分参数过滤条件</span>
+          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 10}" v-model="rangeData.rangeConditions">
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="close">取 消</el-button>
         <el-button size="small" type="primary" @click="submitForm">确 定</el-button>
       </div>
-      <!-- <el-tree :props="props" :load="loadNode" lazy show-checkbox @check-change="handleCheckChange">
-      </el-tree> -->
     </el-dialog>
   </div>
 </template>
 
 <script>
-const data = [
-  {
-    id: 1,
-    name: '总公司',
-    parent_id: null,
-    parent_name: null,
-    has_children: true,
-    children: [
-      {
-        id: 2,
-        name: '1xxxx部门',
-        parent_id: 1,
-        parent_name: '总公司',
-        has_children: true,
-        children: [
-          {
-            id: 12,
-            name: 'x1x项目',
-            parent_id: 1,
-            parent_name: '1xxxx部门',
-            has_children: false,
-            children: []
-          },
-          {
-            id: 13,
-            name: 'x22222x项目',
-            parent_id: 2,
-            parent_name: '1xxxx部门',
-            has_children: true,
-            children: [
-              {
-                id: 19,
-                name: 'xxx',
-                parent_id: 13,
-                parent_name: 'x22222x项目',
-                has_children: false,
-                children: []
-              }
-            ]
-          }
+/*eslint-disable */
+import { mapState } from 'vuex'
 
-        ]
-      },
-      {
-        id: 15,
-        name: '管理办公室',
-        parent_id: 1,
-        parent_name: '总公司',
-        has_children: false,
-        children: []
-      },
-      {
-        id: 16,
-        name: '技术中心',
-        parent_id: 1,
-        parent_name: '总公司',
-        has_children: false,
-        children: []
-      }
-    ]
-  }
-] // tree数据
 export default {
   name: "IndexModal",
   props: {
@@ -103,116 +46,240 @@ export default {
   data () {
     return {
       rules: {
-        isLeaf: [
+        rangeVal: [
           { required: true, message: '请选择', trigger: 'change' }
         ],
-        cnName: [
-          { required: true, message: '请输入框架中文名称', trigger: 'blur' },
-          { min: 1, max: 30, message: '长度不能超过30个字符', trigger: 'blur' }
+        rangeConditions: [
+          { required: true, message: '请输入成分过滤条件', trigger: 'blur' },
         ],
-        enName: [
-          { required: false, message: '请输入框架英文名称', trigger: 'blur' },
-          { min: 1, max: 50, message: '长度不能超过50个字符', trigger: 'blur' }
-        ],
-        sort: [
-          { required: false, message: '', trigger: 'blur' }
-        ]
       },
-      setkey: [1], // 默认展开节点
-      dateList: [], // 遍历用
-      SelectedArray: [12, 13], // 选中的数组
-      dataList: data,
+      dataMapList: [], // 遍历用
+      SelectedArray: [], // 选中的数组
+      dataList: [],
       rangeVal: [], // select绑定的值
       // 对应的字段
       defaultProps: {
-        children: 'children',
-        label: 'name'
-      },
-      props: {
+        children: 'childList',
         label: 'name',
-        children: 'zones'
       },
+      rangeLoading: false,
+      saveData: '',
+      defaultRange: [],
     };
   },
   created () {
+    this.getRangeOptionFrameByBrowserType()
+  },
+  computed: {
+    ...mapState({
+      activeName: 'activeName',
+      browserType: 'browserType',
+      nodeId: 'nodeId',
+      route: 'route'
+    })
   },
   watch: {
 
   },
   mounted () {
-    console.log(this.rangeData)
   },
   methods: {
+    getRangeOptionFrameByBrowserType () {
+      const { flag, rangeOption } = this.rangeData
+      this.rangeLoading = true
+      this.$http({
+        url: '/backapi/databrowser/rangeBack/getRangeOptionTreeByBrowserType',
+        method: 'get',
+        params: {
+          browserType: this.browserType,
+        }
+      }).then((res) => {
+        this.rangeLoading = false
+        if (res && res.success) {
+          // this.dataList = []
+          this.dataList = this.dealData(res.data, 0, '')
+          // 编辑时  需要回显范围数据
+          if (flag === 2) {
+            this.$nextTick(() => {
+              let nowRO = JSON.parse(rangeOption)
+              nowRO = '' + nowRO.exchange + '' + nowRO.option
+              this.defaultRange = [nowRO]
+              this.$refs.rangeTree.setCheckedKeys([nowRO], true)
+            })
+          }
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          })
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'error',
+          message: '获取范围项框架树查询接口超时或出错!'
+        })
+        this.rangeLoading = false
+      })
+    },
+    // 循环处理树状结构数据
+    dealData (data, level, parentName) {
+      const { flag } = this.rangeData
+      if (!data || !data.length) {
+        return []
+      }
+      for (let i = 0; i < data.length; i++) {
+        let item = data[i]
+        item.name = item.rangeOptionFrameName || item.rangeOptionTreeName
+        item.id = (parentName || item.rangeOptionFrameName) + '' + item.rangeOptionTreeCode
+        item.level = level
+        if (item.childList && item.childList.length) {
+          item.has_children = true
+          item.isLeaf = false
+          if (flag === 2) {
+            item.disabled = true
+          }
+          this.dealData(item.childList, ++level, item.name)
+        } else {
+          item.parentName = parentName
+          item.has_children = false
+          item.isLeaf = true
+        }
+      }
+      return data
+    },
     changeData (e) {
-      //   console.log('选中改变的值', e, this.dateList)
       const setkey = []
-      for (let index = 0; index < this.dateList.length; index++) {
+      for (let index = 0; index < this.dataMapList.length; index++) {
         for (let index1 = 0; index1 < e.length; index1++) {
-          if (this.dateList[index].name === e[index1]) {
-            setkey.push(this.dateList[index].id)
+          if (this.dataMapList[index].name === e[index1]) {
+            setkey.push(this.dataMapList[index].id)
           }
         }
       }
-    //   console.log(setkey)
       this.setkey = setkey
       // 重新 设置tree
-      this.$refs.rangeTree.setCheckedKeys(setkey)
+      this.$nextTick(() => {
+        this.$refs.rangeTree.setCheckedKeys(setkey, true)
+      })
     },
     // 点击树形图复选框触发 
-    handleCheckChange (data, checked, indeterminate) {
-      console.log(data, checked, indeterminate);
-      //   点击了复选框 使用this.$refs.rangeTree.getCheckedNodes获取当前选中的节点
-      const res = this.$refs.rangeTree.getCheckedNodes(false, true) // 这里两个true，1. 是否只是叶子节点 2. 是否包含半选节点（就是使得选择的时候不包含父节点）
-    //   console.log('点击树形图获取当前选中的节点', res)
-      this.dateList = res
+    handleCheckChange (data, checked) {
+      const { flag } = this.rangeData
+      let checkNodes = []
+      if (flag === 2) {
+        // this.$refs.rangeTree.setCheckedKeys([], true)
+        if (checked) {
+          checkNodes = [data]
+          this.$refs.rangeTree.setCheckedKeys([data.id], true)
+        }
+      }
+      // checkNodes = this.$refs.rangeTree.getCheckedNodes(true)
+      // if (flag === 2 && checkNodes.length > 1) {
+      //   this.$message({
+      //     type: 'info',
+      //     message: '编辑时只能选一个范围!'
+      //   })
+      //   this.$refs.rangeTree.setCheckedKeys(this.defaultRange, true)
+      //   return
+      // }
+      //点击了复选框 使用this.$refs.rangeTree.getCheckedNodes获取当前选中的节点
+      checkNodes = this.$refs.rangeTree.getCheckedNodes()
+      this.dataMapList = checkNodes
       const labelArr = []
       const valueArr = []
-      res.forEach((element) => {
-        if (!element.has_children) {
+      const saveData = []
+      checkNodes.forEach((element) => {
+        if (element.isLeaf) {
           labelArr.push(element.name)
           valueArr.push(element.id)
+          saveData.push({
+            parentName: element.parentName,
+            rangeName: element.name,
+            rangeOption: element.rangeOptionTreeCode,
+          })
         }
       })
       this.rangeVal = labelArr // select显示的数据
-      this.SelectedArray = valueArr // 我要发送给后端的数据
-      console.log(this.rangeVal, this.SelectedArray)
-    },
-    loadNode (node, resolve) {
-      if (node.level === 0) {
-        return resolve([{ name: 'region1' }, { name: 'region2' }]);
-      }
-      if (node.level > 3) return resolve([]);
-
-      var hasChild;
-      if (node.data.name === 'region1') {
-        hasChild = true;
-      } else if (node.data.name === 'region2') {
-        hasChild = false;
+      this.SelectedArray = valueArr
+      this.defaultRange = valueArr
+      this.saveData = saveData// 我要发送给后端的数据
+      // console.log(this.rangeVal, this.SelectedArray)
+      // console.log('点击树形图获取当前选中的节点', checkNodes)
+      if (labelArr.length === 0) {
+        this.rules.rangeVal[0].required = true
       } else {
-        hasChild = Math.random() > 0.5;
+        this.rules.rangeVal[0].required = false
       }
-
-      setTimeout(() => {
-        var data;
-        if (hasChild) {
-          data = [{
-            name: 'zone' + this.count++
-          }, {
-            name: 'zone' + this.count++
-          }];
-        } else {
-          data = [];
-        }
-
-        resolve(data);
-      }, 500);
     },
     submitForm () {
       this.$refs.frameForm.validate((valid) => {
         if (valid) {
-          alert('submit!');
+          this.close();
+          const { frameId, sortBy = 1, rangeConditions, isDelete, rangeId, flag } = this.rangeData
+          let saveData = []
+          this.saveData.map((item) => {
+            saveData.push({
+              browserType: this.browserType,
+              parentId: frameId,
+              rangeConditions,
+              rangeName: item.rangeName,
+              rangeOption: JSON.stringify({
+                exchange: item.parentName,
+                option: item.rangeOption
+              }),
+              sortBy
+            })
+          })
+          let url
+          let params
+          if (flag === 1) {
+            url = '/backapi/databrowser/rangeBack/saveRange'
+            params = JSON.stringify(saveData)
+          } else {
+            if (this.rangeVal.length > 1 || this.SelectedArray.length > 1) {
+              this.$message({
+                type: 'info',
+                message: '编辑时只能选一个范围!'
+              })
+              return
+            }
+            url = '/backapi/databrowser/rangeBack/updateRange'
+            params = {
+              browserType: this.browserType,
+              id: rangeId,
+              isDelete,
+              rangeConditions,
+              rangeName: this.rangeVal[0],
+              rangeOption: JSON.stringify({
+                exchange: this.saveData[0].parentName,
+                option: this.saveData[0].rangeOption
+              }),
+              sortBy
+            }
+          }
+          this.$parent.$parent.changeLoading(true)
+          this.$http({
+            url,
+            method: 'post',
+            params
+          }).then((res) => {
+            this.$parent.$parent.changeLoading(false)
+            if (res && res.success) {
+              this.$message({
+                type: 'success',
+                message: res.message
+              });
+              this.$parent.$parent.getData()
+            } else {
+              this.$message({
+                type: 'error',
+                message: res.message
+              });
+            }
+          }).catch(() => {
+            this.$parent.$parent.changeLoading(false)
+          })
         } else {
-          console.log('error submit!!');
           return false;
         }
       });
@@ -230,6 +297,9 @@ export default {
 <style scoped lang="less">
 .treeOuter {
   position: relative;
+}
+.red {
+  color: #f56c6c;
 }
 .treeDiv {
   border: 1px solid #d3dce6;

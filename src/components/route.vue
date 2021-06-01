@@ -37,15 +37,15 @@
         <el-table v-else :data="tableData" ref="zb_table" size="small" border class="zb-modal-table" v-loading="loading"
           :height="zb_tableHeight" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"> </el-table-column>
-          <el-table-column property="name" label="范围名称" width="300"></el-table-column>
-          <el-table-column property="filter" label="状态参数过滤条件" width="400"></el-table-column>
+          <el-table-column property="rangeName" label="范围名称" width="300"></el-table-column>
+          <el-table-column property="rangeConditions" label="状态参数过滤条件" width="400"></el-table-column>
           <el-table-column property="isDelete" label="状态">
             <template slot-scope="scope">{{ scope.row.isDelete !== 1 ? '启用' : '停用' }}</template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" @click="rangeModal(2,scope.row)">编辑</el-button>
-              <el-button icon="el-icon-delete" v-if="scope.row.nodeStatus === 1" class="delBtn" type="text"
+              <el-button icon="el-icon-delete" v-if="scope.row.isDelete !== 1" class="delBtn" type="text"
                 slot="reference" @click="changeNodeStatus(1,scope.row)">停用</el-button>
               <el-button type="text" v-else slot="reference" @click="changeNodeStatus(0,scope.row)">启用</el-button>
             </template>
@@ -121,7 +121,7 @@ export default {
   mounted () {
     this.getData()
     this.$nextTick(() => {
-      if (this.$refs.zb_table.$el) {
+      if (this.$refs.zb_table && this.$refs.zb_table.$el) {
         let bH = document.body.offsetHeight;
         let sH = this.$refs.zb_table.$el.getBoundingClientRect().top;
         let domH = this.$refs.zb_botAction.offsetHeight;
@@ -130,7 +130,7 @@ export default {
     })
     let self = this
     window.onresize = () => {
-      if (self.$refs.zb_table.$el) {
+      if (self.$refs.zb_table && self.$refs.zb_table.$el) {
         let bH = document.body.offsetHeight;
         let sH = self.$refs.zb_table.$el.getBoundingClientRect().top;
         let domH = self.$refs.zb_botAction.offsetHeight;
@@ -145,18 +145,26 @@ export default {
       const { id } = this.routeData
       this.loading = true
       let url = ''
+      let params = {}
       if (this.activeName === 'indexFrame') {
         url = '/backapi/databrowser/systemIndexFrameRelationBack/getSystemIndexRelationByFrameId/' + id
+        params = {
+          pageNo,
+          pageSize,
+        }
       } else {
-        url = '/backapi/databrowser/systemIndexFrameRelationBack/getSystemIndexRelationByFrameId/' + id
+        url = '/backapi/databrowser/rangeBack/getRangeByParentId'
+        params = {
+          parentId: id,
+          pageNo,
+          pageSize,
+          browserType: this.browserType,
+        }
       }
       this.$http({
         url,
         method: 'get',
-        params: {
-          pageNo,
-          pageSize,
-        }
+        params
       }).then((res) => {
         this.loading = false
         if (res && res.success) {
@@ -166,8 +174,17 @@ export default {
             ...this.pageParams,
             total,
           }
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.message
+          })
         }
       }).catch(() => {
+        this.$message({
+          type: 'error',
+          message: '获取框架范围接口出错!'
+        })
         this.loading = false
       })
     },
@@ -176,9 +193,13 @@ export default {
     },
     // 范围 新增||编辑 弹窗
     rangeModal (flag, data) {
+      const { id } = this.routeData
+      const rangeId = data.id
       this.rangeData = {
         ...data,
         flag,
+        rangeId,
+        frameId: id,
         sortBy: flag === 2 ? '' + data.sortBy : 1,
         headTitle: flag === 1 ? '新增范围' : '编辑范围'
       }
@@ -205,16 +226,35 @@ export default {
 
     changeNodeStatus (flag, node) {
       this.loading = true
-      const { id, indexId, indexName } = node
-      this.$http({
-        url: '/backapi/databrowser/systemIndexFrameRelationBack/updateSystemIndexRelation',
-        method: 'post',
-        params: {
+      let url = ''
+      let params = {}
+      if (this.activeName === 'indexFrame') {
+        const { id, indexId, indexName, sortBy } = node
+        url = '/backapi/databrowser/systemIndexFrameRelationBack/updateSystemIndexRelation'
+        params = {
           id,
           indexId,
           indexName,
           isDelete: flag,
+          sortBy
         }
+      } else {
+        const { id, rangeConditions, rangeName, rangeOption, sortBy } = node
+        url = '/backapi/databrowser/rangeBack/updateRange'
+        params = {
+          browserType: this.browserType,
+          id,
+          isDelete: flag,
+          rangeConditions,
+          rangeName,
+          rangeOption,
+          sortBy
+        }
+      }
+      this.$http({
+        url,
+        method: 'post',
+        params
       }).then((res) => {
         this.loading = false
         if (res && res.success) {
@@ -255,6 +295,7 @@ export default {
     changeLoading (flag) {
       this.loading = flag
     },
+    // 批量删除
     mulDel () {
       let message
       if (this.activeName === 'indexFrame') {
@@ -273,8 +314,14 @@ export default {
             this.multipleSelection.map(item => {
               ids.push(item.id)
             })
+            let url = ''
+            if (this.activeName === 'indexFrame') {
+              url = '/backapi/databrowser/systemIndexFrameRelationBack/delSystemIndexRelation'
+            } else {
+              url = '/backapi/databrowser/rangeBack/delRangeByIds'
+            }
             this.$http({
-              url: '/backapi/databrowser/systemIndexFrameRelationBack/delSystemIndexRelation',
+              url,
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {

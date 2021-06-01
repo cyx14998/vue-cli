@@ -3,7 +3,7 @@
   <div class="modal frame-modal">
     <el-dialog :title="indicatorData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
       :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
-      <el-form :model="indicatorData" ref="indicatorForm" :rules="rules">
+      <el-form :model="indicatorData" ref="indicatorForm" :rules="rules" v-loading="indicatorLoading">
         <el-form-item label="指标" label-width="120px" prop="indexId">
           <!-- <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input> -->
           <el-select v-model="indicatorData.indexId" filterable placeholder="输入指标ID/指标名称" :filter-method="dataFilter"
@@ -43,6 +43,7 @@ export default {
       },
       dataArr: [],
       dataArrCopy: [], // 筛选需要
+      indicatorLoading: false,
     };
   },
   created () {
@@ -61,6 +62,7 @@ export default {
   },
   methods: {
     getData () {
+      this.indicatorLoading = true
       this.$http({
         url: '/backapi/databrowser/systemIndexBack/getAddSystemIndexName',
         method: 'get',
@@ -68,6 +70,7 @@ export default {
           browserType: this.browserType,
         }
       }).then((res) => {
+        this.indicatorLoading = false
         if (res && res.success) {
           this.dataArrCopy = this.dataArr = res.data
         } else {
@@ -76,6 +79,12 @@ export default {
             message: res.message
           })
         }
+      }).catch(() => {
+        this.indicatorLoading = false
+        this.$message({
+          type: 'error',
+          message: '指标查询接口超时或出错!'
+        })
       })
     },
     dataFilter (val) {
