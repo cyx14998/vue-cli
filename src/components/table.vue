@@ -313,12 +313,10 @@ export default {
             this.getData()
           })
         } else {
-          this.$message({
-            type: 'error',
-            message: res.message
-          });
+          this.$message.error(res.message)
         }
       }).catch(() => {
+        this.$message.error('获取框架table接口超时或出错！')
         this.loading = false
       })
     },
@@ -356,8 +354,14 @@ export default {
             this.multipleSelection.map(item => {
               ids.push(item.id)
             })
+            let url
+            if (this.activeName === "indexFrame") {
+              url = '/backapi/databrowser/systemIndexFrameBack/delSystemIndexFrameByIds'
+            } else {
+              url = "/backapi/databrowser/rangeFrameBack/delRangeFrameByIds"
+            }
             this.$http({
-              url: '/backapi/databrowser/glTemplate/batchDeleteFramework',
+              url,
               method: 'post',
               params: JSON.stringify(ids)
             }).then((res) => {
@@ -372,12 +376,10 @@ export default {
                   this.getData()
                 })
               } else {
-                this.$message({
-                  type: 'error',
-                  message: res.message
-                });
+                this.$message.error(res.message)
               }
             }).catch(() => {
+              this.$message.error('批量删除接口超时或出错!')
               this.loading = false
             })
           }
