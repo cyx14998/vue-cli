@@ -159,6 +159,10 @@ export default {
           pageNo: 1,
         }
       }
+      // 重置parentId
+      if (params.parentId === '') {
+        delete params.parentId
+      }
       this.$http({
         url,
         method: 'post',

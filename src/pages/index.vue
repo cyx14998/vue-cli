@@ -98,6 +98,7 @@ export default {
       this.$store.dispatch('setNodeId', -1)
       this.$store.dispatch('setBrowsersType', val)
       this.$store.dispatch('setActiveName', 'indexFrame')
+      this.$refs.search.resetForm()
       let route = ''
       this.options.map(item => {
         if (item.id === val) {
