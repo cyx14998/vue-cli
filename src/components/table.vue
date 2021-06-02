@@ -24,7 +24,9 @@
       </el-table-column>
       <el-table-column prop="frameNameEn" label="框架英文名称" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column prop="route" label="框架路径">
+      <el-table-column prop="systemIndexNamePath" label="框架路径" v-if="activeName === 'indexFrame'">
+      </el-table-column>
+      <el-table-column prop="rangeFrameNamePath" label="框架路径" v-else>
       </el-table-column>
       <el-table-column prop="isLeaf" label="是否叶子节点" width="106">
         <template slot-scope="scope">{{ scope.row.isLeaf ? '是' : '否' }}</template>
@@ -40,14 +42,6 @@
           <el-button class="marginl10" type="text" v-if="activeName === 'indexFrame'" @click="openRoute(scope.row)">指标
           </el-button>
           <el-button type="text" v-else @click="openRoute(scope.row)">范围</el-button>
-          <!-- <el-popconfirm class="marginl10 displayi-b" title="是否停用?" v-if="scope.row.isDelete !== 1"
-            @confirm="()=>{changeNodeStatus(1,scope.row)}">
-            <el-button icon="el-icon-delete" class="delBtn" type="text" slot="reference">停用</el-button>
-          </el-popconfirm>
-          <el-popconfirm class="marginl10 displayi-b" title="是否启用?" v-else
-            @confirm="()=>{changeNodeStatus(0,scope.row)}">
-            <el-button type="text" slot="reference">启用</el-button>
-          </el-popconfirm> -->
           <el-button icon="el-icon-delete" class="delBtn" type="text" v-if="scope.row.isDelete !== 1"
             @click="changeNodeStatus(1,scope.row)">停用</el-button>
           <el-button type="text" v-else @click="changeNodeStatus(0,scope.row)">启用</el-button>
@@ -277,7 +271,8 @@ export default {
         return
       }
       this.routeData = {
-        ...data
+        ...data,
+        route: (data.systemIndexNamePath || data.rangeFrameNamePath) + '|' + data.frameName
       }
       this.routeVisible = true
     },
