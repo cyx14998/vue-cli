@@ -45,6 +45,9 @@ export default {
         title: [
           { required: true, message: '请输入模板名称', trigger: 'blur' }
         ],
+        sortNo: [
+          { required: true, message: '请填写排序', trigger: 'blur' }
+        ],
         templateFile: [
           { required: true, message: '请上传模板文件', trigger: 'change' }
         ],

@@ -108,7 +108,7 @@ export default {
       let self = this
       this.$refs.indicatorForm.validate((valid) => {
         if (valid) {
-          const { id, frameId, indexId, sortBy, flag } = this.indicatorData
+          const { id, frameId, indexId, sortBy = 1, flag } = this.indicatorData
           self.close();
           self.$parent.$parent.changeLoading(true)
           let len = this.dataArrCopy.length
