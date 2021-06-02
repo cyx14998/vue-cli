@@ -2,7 +2,8 @@
 <template>
   <div class="modal frame-modal">
     <el-dialog :title="indicatorData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
-      :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
+      :close-on-click-modal="false" :close-on-press-escape="false" :modal-append-to-body="false"
+      :destroy-on-close='true' :before-close="close">
       <el-form :model="indicatorData" ref="indicatorForm" :rules="rules" v-loading="indicatorLoading">
         <el-form-item label="指标" label-width="120px" prop="indexId">
           <!-- <el-input v-model="indicatorData.title" style="width: 260px;" placeholder="输入指标ID/指标名称"></el-input> -->
@@ -14,7 +15,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortBy">
-          <el-input-number size="small" v-model="indicatorData.sortBy" controls-position="right" :min="1">
+          <el-input-number size="small" v-model="indicatorData.sortBy" controls-position="right" :min="1" :max="99">
           </el-input-number>
         </el-form-item>
       </el-form>

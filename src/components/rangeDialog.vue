@@ -2,7 +2,7 @@
 <template>
   <div class="modal frame-modal">
     <el-dialog :title="rangeData.headTitle" :visible.sync="visible" width="500px" destroy-on-close :show-close="false"
-      :modal-append-to-body="false" :before-close="close">
+      :close-on-click-modal="false" :close-on-press-escape="false" :modal-append-to-body="false" :before-close="close">
       <el-form :model="rangeData" ref="frameForm" :rules="rules" hide-required-asterisk v-loading="rangeLoading">
         <el-form-item label-width="140px" prop="rangeVal" class="treeOuter">
           <span slot="label"><span class="red">*</span> 范围</span>

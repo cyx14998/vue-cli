@@ -139,7 +139,7 @@ export default {
         flag,
         sortNo: flag === 2 ? '' + data.sortNo : 1,
         templateFile: null,
-        headTitle: flag === 1 ? '新增框架' : '编辑框架'
+        headTitle: flag === 1 ? '新增模板' : '编辑模板'
       }
       this.templateDialogVisible = true
     },

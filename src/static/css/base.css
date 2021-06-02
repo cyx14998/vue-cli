@@ -461,3 +461,7 @@ th {
 .el-button [class*=el-icon-]+span {
   margin-left: 0;
 }
+
+.el-dialog__header {
+  border-bottom: 1px solid #eee;
+}

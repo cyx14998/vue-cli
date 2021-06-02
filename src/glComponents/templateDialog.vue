@@ -2,13 +2,14 @@
 <template>
   <div class="modal frame-modal">
     <el-dialog :title="templateData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
-      :modal-append-to-body="false" :destroy-on-close='true' :before-close="close">
+      :close-on-click-modal="false" :close-on-press-escape="false" :modal-append-to-body="false"
+      :destroy-on-close='true' :before-close="close">
       <el-form :model="templateData" ref="frameForm" :rules="rules">
         <el-form-item label="模板名称" label-width="120px" prop="title">
           <el-input v-model="templateData.title" style="width: 260px;" placeholder="输入模板名称"></el-input>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortNo">
-          <el-input-number size="small" v-model="templateData.sortNo" controls-position="right" :min="1">
+          <el-input-number size="small" v-model="templateData.sortNo" controls-position="right" :min="1" :max="99">
           </el-input-number>
         </el-form-item>
         <el-form-item class="uploadCon" label-width="120px" prop="templateFile">

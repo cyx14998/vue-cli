@@ -95,6 +95,7 @@ export default {
       this.node = node
       this.$store.dispatch('setNodeId', nodeObj.id)
     },
+    // 处理关联模板 框架路径
     dealRoute (node, route) {
       if (node.parent && node.parent != null) {
         route.unshift(node.label)

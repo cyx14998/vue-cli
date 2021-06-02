@@ -187,7 +187,7 @@ export default {
                     type: 'success',
                     message: res.message
                   });
-                  this.$parent.$refs.nodeTree.dealDelNode(this.multipleSelection)
+                  this.$parent.$refs.nodeTree.dealDelNode([node])
                   this.$nextTick(() => {
                     this.getData()
                   })

@@ -2,7 +2,7 @@
 <template>
   <div class="modal frame-modal">
     <el-dialog :title="frameData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
-      :destroy-on-close='true' :before-close="close">
+      :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close='true' :before-close="close">
       <el-form :model="frameData" ref="frameForm" :rules="rules">
         <el-form-item label="框架中文名称" label-width="120px" prop="title">
           <el-input v-model="frameData.title"></el-input>
@@ -11,7 +11,7 @@
           <el-input v-model="frameData.enName"></el-input>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortNo">
-          <el-input-number size="small" v-model="frameData.sortNo" controls-position="right" :min="1">
+          <el-input-number size="small" v-model="frameData.sortNo" controls-position="right" :min="1" :max="99">
           </el-input-number>
         </el-form-item>
       </el-form>

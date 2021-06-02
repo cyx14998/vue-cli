@@ -2,7 +2,7 @@
 <template>
   <div class="modal frame-modal">
     <el-dialog :title="frameData.headTitle" :visible.sync="visible" width="500px" :show-close="false"
-      :destroy-on-close='true' :before-close="close">
+      :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close='true' :before-close="close">
       <el-form :model="frameData" ref="frameForm" :rules="rules">
         <el-form-item label="是否叶子节点" label-width="120px" prop="isLeaf">
           <el-select v-model="frameData.isLeaf" style="width: 100%;">
@@ -17,7 +17,7 @@
           <el-input v-model="frameData.frameNameEn"></el-input>
         </el-form-item>
         <el-form-item label="排序" label-width="120px" prop="sortBy">
-          <el-input-number size="small" v-model="frameData.sortBy" controls-position="right" :min="1">
+          <el-input-number size="small" v-model="frameData.sortBy" controls-position="right" :min="1" :max="99">
           </el-input-number>
         </el-form-item>
       </el-form>
@@ -47,9 +47,9 @@ export default {
           { required: true, message: '请输入框架中文名称', trigger: 'blur' },
           { min: 1, max: 30, message: '长度不能超过30个字符', trigger: 'blur' }
         ],
-        enName: [
+        frameNameEn: [
           { required: false, message: '请输入框架英文名称', trigger: 'blur' },
-          { min: 1, max: 50, message: '长度不能超过50个字符', trigger: 'blur' }
+          { min: 1, max: 50, message: '长度不能超过50个字符', trigger: 'input' }
         ],
         sortBy: [
           { required: true, message: '', trigger: 'blur' }
@@ -84,7 +84,7 @@ export default {
             isLeaf: +isLeaf,
             parentId: this.nodeId,
           }
-          
+
           // 指标框架
           if (this.activeName === 'indexFrame') {
             // 新增
