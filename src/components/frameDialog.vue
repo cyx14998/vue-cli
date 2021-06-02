@@ -52,7 +52,7 @@ export default {
           { min: 1, max: 50, message: '长度不能超过50个字符', trigger: 'input' }
         ],
         sortBy: [
-          { required: true, message: '', trigger: 'blur' }
+          { required: true, message: '请输入排序', trigger: 'blur' }
         ]
       }
     };

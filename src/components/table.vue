@@ -270,9 +270,11 @@ export default {
         }
         return
       }
+      let pRoute = data.systemIndexNamePath || data.rangeFrameNamePath
+      let route = pRoute ? pRoute + '|' + data.frameName : data.frameName
       this.routeData = {
         ...data,
-        route: (data.systemIndexNamePath || data.rangeFrameNamePath) + '|' + data.frameName
+        route
       }
       this.routeVisible = true
     },

@@ -65,7 +65,7 @@ export default {
         if (valid) {
           self.close();
           self.$parent.changeLoading(true)
-          const { title, enName, sortNo, flag, status, id } = self.frameData
+          const { title, enName, sortNo = 1, flag, status, id } = self.frameData
           // 新增
           let url = '/backapi/databrowser/glTemplate/addFramework'
           let params = {
