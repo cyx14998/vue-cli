@@ -242,21 +242,29 @@ export default {
       this.frameDialogVisible = false
     },
     editNode (flag, data) {
-      if (flag === 1 && this.isLeaf === 1) {
-        this.$message({
-          type: 'info',
-          message: '叶子节点无法新增框架'
-        })
-        return
+      try {
+        if (flag === 1 && this.isLeaf === 1) {
+          this.$message.info('叶子节点无法新增框架')
+          return
+        }
+        let nodeId = '' + this.nodeId
+        const tailTwo = nodeId.substring(nodeId.length - 2)
+        if (parseInt(tailTwo) > 0) {
+          this.$message.info('框架层级最高为5层！')
+          return
+        }
+        this.frameData = {
+          ...data,
+          isLeaf: flag === 2 ? '' + data.isLeaf : '',
+          flag,
+          sortBy: flag === 2 ? '' + data.sortBy : 1,
+          headTitle: flag === 1 ? '新增框架' : '编辑框架'
+        }
+        this.frameDialogVisible = true
+      } catch {
+        this.$message.error('新增或编辑框架出错!')
       }
-      this.frameData = {
-        ...data,
-        isLeaf: flag === 2 ? '' + data.isLeaf : '',
-        flag,
-        sortBy: flag === 2 ? '' + data.sortBy : 1,
-        headTitle: flag === 1 ? '新增框架' : '编辑框架'
-      }
-      this.frameDialogVisible = true
+
     },
     // 打开指标||范围页面
     openRoute (data) {

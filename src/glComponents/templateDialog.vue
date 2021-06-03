@@ -16,7 +16,7 @@
           <el-button size="small" type="primary" @click="handleChange">上传模板文件
             <!-- <i v-if="templateData.templateFile !== null" class="el-icon-check"></i> -->
           </el-button>
-          <img class="uploadImg" v-if="templateData.templateFile !== null" src="../static/img/icon.png" alt="">
+          <img class="uploadImg" v-if="templateData.templateFile !== null || templateData.flag === 2" src="../static/img/icon.png" alt="">
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
