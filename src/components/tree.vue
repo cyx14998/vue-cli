@@ -70,7 +70,7 @@ export default {
       this.$nextTick(() => {
         this.getAllNodesById(this.id)
         this.$parent.$refs.search.resetForm()
-        this.$parent.$refs.tablePage.getData(1)
+        this.$parent.$refs.tablePage.getData('tree', 1)
       })
     },
     //获取树的所有节点
@@ -176,7 +176,7 @@ export default {
       this.$store.dispatch('setIsLeaf', nodeObj.isLeaf)
       this.$nextTick(() => {
         this.$parent.$refs.search.resetForm()
-        this.$parent.$refs.tablePage.getData(1)
+        this.$parent.$refs.tablePage.getData('tree', 1)
       })
     },
     dealRoute (node, route) {

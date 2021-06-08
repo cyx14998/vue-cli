@@ -45,8 +45,8 @@ export default {
   methods: {
     onSubmit () {
       this.$store.dispatch("setFilterParams", { ...this.formInline })
-      this.$store.dispatch('setNodeId', '')
-      this.$parent.$refs.tablePage.getData(1)
+      // this.$store.dispatch('setNodeId', '')
+      this.$parent.$refs.tablePage.getData('search', 1)
     },
     resetForm () {
       this.$refs['formInline'].resetFields();

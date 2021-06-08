@@ -82,7 +82,7 @@ export default {
             frameNameEn: frameNameEn || '',
             sortBy,
             isLeaf: +isLeaf,
-            parentId: this.nodeId,
+            parentId: this.nodeId !== '' ? this.nodeId : -1,
           }
 
           // 指标框架
@@ -125,6 +125,8 @@ export default {
                 message: res.message
               })
               if (res.data) {
+                this.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
+                this.$parent.$parent.$refs.search.resetForm()
                 // 新增
                 if (flag === 1) {
                   this.$parent.$parent.$refs.nodeTree.dealAddNode(res.data)

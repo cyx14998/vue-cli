@@ -20,7 +20,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label-width="140px" prop="rangeConditions">
-          <span slot="label"><span class="red">*</span> 成分参数过滤条件</span>
+          <span slot="label">成分参数过滤条件</span>
           <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 10}" v-model="rangeData.rangeConditions">
           </el-input>
         </el-form-item>
@@ -50,7 +50,7 @@ export default {
           { required: true, message: '请选择', trigger: 'change' }
         ],
         rangeConditions: [
-          { required: true, message: '请输入成分过滤条件', trigger: 'blur' },
+          { required: false, message: '请输入成分过滤条件', trigger: 'blur' },
         ],
       },
       dataMapList: [], // 遍历用

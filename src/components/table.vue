@@ -54,7 +54,7 @@
       </el-col>
       <el-col :span="16" class="align-right">
         <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-          :current-page="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
+          :current-page.sync="pageParams.pageNo" :page-sizes="[10, 20, 50, 100]" :page-size="pageParams.pageSize"
           layout="total, sizes, prev, pager, next, jumper" :total="pageParams.total">
         </el-pagination>
       </el-col>
@@ -97,10 +97,11 @@ export default {
       frameDialogVisible: false, // 新增||编辑 框架dialog
       frameData: '', // 新增||编辑 传进去的数据
       loading: false,
+      flag: '', // 搜索标识
     };
   },
   created () {
-    this.getData()
+    this.getData('tree')
   },
   computed: {
     ...mapState({
@@ -116,7 +117,7 @@ export default {
   mounted () {
   },
   methods: {
-    getData (flag) {
+    getData (flag, pageNum) {
       this.multipleSelection = []
       const { pageNo, pageSize } = this.pageParams
       const { frameName, isDelete } = this.filterParams
@@ -124,8 +125,15 @@ export default {
       let url = ''
       let downLoadUrl = ''
       let params = {}
+      // 
+      if (pageNum) {
+        params.pageNo = pageNum
+        this.$set(this.pageParams, 'pageNo', pageNum)
+      } else {
+        params.pageNo = pageNo
+      }
       if (this.activeName === 'indexFrame') {
-        url = `/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
+        url = `/backapi/databrowser/systemIndexFrameBack/getSystemFrameListByNameLikeAndStatus?pageNo=${params.pageNo}&pageSize=${pageSize}`
         params = {
           browserType: this.browserType,
           parentId: this.nodeId,
@@ -136,7 +144,7 @@ export default {
         }
         downLoadUrl = baseUrl + '/backapi/databrowser/systemIndexFrameBack/download'
       } else {
-        url = `/backapi/databrowser/rangeFrameBack/getRangeFrameListByNameLikeAndStatus?pageNo=${pageNo}&pageSize=${pageSize}`
+        url = `/backapi/databrowser/rangeFrameBack/getRangeFrameListByNameLikeAndStatus?pageNo=${params.pageNo}&pageSize=${pageSize}`
         params = {
           browserType: this.browserType,
           parentId: this.nodeId,
@@ -151,18 +159,11 @@ export default {
       if (params.isDelete === '-1') {
         delete params.isDelete
       }
-      // 重置pageNo
-      if (flag === 1) {
-        params.pageNo = 1
-        this.pageParams = {
-          ...this.pageParams,
-          pageNo: 1,
-        }
-      }
       // 重置parentId
-      if (params.parentId === '') {
+      if (flag === 'search') {
         delete params.parentId
       }
+      this.flag = flag
       this.$http({
         url,
         method: 'post',
@@ -172,10 +173,7 @@ export default {
         if (res && res.success) {
           const { total, records } = res.data
           this.tableData = records
-          this.pageParams = {
-            ...this.pageParams,
-            total,
-          }
+          this.$set(this.pageParams, 'total', total)
         } else {
           this.$message.error(res.message || '获取table数据出错!')
         }
@@ -195,9 +193,9 @@ export default {
         this.changeLoading(true)
         let url = ''
         if (this.activeName === 'indexFrame') {
-          url = baseUrl + `/backapi/databrowser/systemIndexFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId}`
+          url = baseUrl + `/backapi/databrowser/systemIndexFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId !== '' ? this.nodeId : -1} `
         } else {
-          url = baseUrl + `/backapi/databrowser/rangeFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId}`
+          url = baseUrl + `/backapi/databrowser/rangeFrameBack/upload?browserType=${this.browserType}&parentId=${this.nodeId !== '' ? this.nodeId : -1}`
         }
         let formData = new FormData();
         formData.append('file', e.target.files[0]);
@@ -214,8 +212,11 @@ export default {
                 type: 'success',
                 message: res.data.message
               })
+              self.$store.dispatch("setFilterParams", { frameName: '', isDelete: '-1' })
               self.$nextTick(() => {
+                self.$parent.$refs.search.resetForm()
                 self.getData()
+                self.$parent.$refs.nodeTree.dealAddNode()
               })
             } else {
               self.$message({
@@ -319,7 +320,7 @@ export default {
           // 切换状态（启用||停用）
           this.$parent.$refs.nodeTree.dealEditNode(res.data)
           this.$nextTick(() => {
-            this.getData()
+            this.getData(this.flag)
           })
         } else {
           this.$message.error(res.message)
@@ -331,19 +332,13 @@ export default {
     },
     // 每页显示多少 change
     handleSizeChange (val) {
-      this.pageParams = {
-        ...this.pageParams,
-        pageSize: val
-      }
-      this.getData()
+      this.$set(this.pageParams, 'pageSize', val)
+      this.getData(this.flag)
     },
     // 页码change
     handleCurrentChange (val) {
-      this.pageParams = {
-        ...this.pageParams,
-        pageNo: val
-      }
-      this.getData()
+      this.pageParams = Object.assign({}, this.pageParams, { pageNo: val })
+      this.getData(this.flag, val)
     },
     handleSelectionChange (val) {
       this.multipleSelection = val;
@@ -382,7 +377,7 @@ export default {
                 });
                 this.$parent.$refs.nodeTree.dealDelNode(this.multipleSelection)
                 this.$nextTick(() => {
-                  this.getData()
+                  this.getData(this.flag)
                 })
               } else {
                 this.$message.error(res.message)
