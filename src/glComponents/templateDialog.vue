@@ -73,7 +73,7 @@ export default {
     } else {
       this.rules.templateFile[0].required = false
     }
-    if (this.browserType == '0') {
+    if (this.browserType == '2') {
       this.accept = '.mtext'
     }
     // console.log(this.templateData)
